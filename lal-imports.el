@@ -83,7 +83,7 @@
                (insert-char ?\n 1)))))
 
 (defun add-newline-before-java ()
-  (progn
+  (save-excursion
     (beginning-of-buffer)
     (if (re-search-forward "^import java.*" nil t)
         (progn (beginning-of-line)
