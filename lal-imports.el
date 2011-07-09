@@ -72,7 +72,8 @@
   (message d)
   (let ((prefix
          (cond
-          ((starts-with d "com.phonegap.lal") "000")
+          ((starts-with d "com.lal") "000")
+          ((starts-with d "com.phonegap.lal") "001")
           ((starts-with d "java.") "100")
           (t "001"))))
     (concat prefix d)))
