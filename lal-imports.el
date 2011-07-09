@@ -106,7 +106,7 @@
     (let ((old-imports (remove-if-not 'import-used-p (imports-in-buffer))))
       (delete-all-imports) 
       (mapc (lambda (val) (insert-string (concat "import " val "\n")))
-            (sort old-improts 'lal-import-lessp))
+            (sort old-imports 'lal-import-lessp))
 
       (add-newline-after-phonegap)
       (add-newline-before-java))))
