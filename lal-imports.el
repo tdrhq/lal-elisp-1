@@ -104,7 +104,6 @@
   (interactive)
   (save-excursion
     (let ((old-imports (remove-if-not 'import-used-p (imports-in-buffer))))
-      (message old-imports)
       (delete-all-imports) 
       (mapc (lambda (val) (insert-string (concat "import " val "\n")))
             (sort old-improts 'lal-import-lessp))
@@ -126,7 +125,6 @@
 (defmacro with-buffer-copy (&rest body)
   `(lexical-let ((buffer-string-copy (buffer-string)))
      (with-temp-buffer
-       (message buffer-string-copy)
        (insert buffer-string-copy)
        (beginning-of-buffer)
        (progn ,@body))))
