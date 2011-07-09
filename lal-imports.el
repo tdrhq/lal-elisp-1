@@ -39,6 +39,12 @@
    (< (length prefix) (length str))
    (equal (substring str 0 (length prefix)) prefix)))
 
+(defun reverse-string (str)
+  (apply 'string (reverse (string-to-list str))))
+
+(defun ends-with (str prefix)
+  (starts-with (reverse-string str) (reverse-string prefix)))
+
 (defun remove-root-from-import (import)
   (if (starts-with import "_root_.")
       (substring import 7)
@@ -97,11 +103,43 @@
 (defun lal-reorder-imports ()
   (interactive)
   (save-excursion
-    (let ((old-imports (imports-in-buffer)))
+    (let ((old-imports (remove-if-not 'import-used-p (imports-in-buffer))))
+      (message old-imports)
       (delete-all-imports) 
       (mapc (lambda (val) (insert-string (concat "import " val "\n")))
-            (sort old-imports 'lal-import-lessp))
+            (sort old-improts 'lal-import-lessp))
 
       (add-newline-after-phonegap)
       (add-newline-before-java))))
+
+
+
+(defun symbol-from-import (import)
+  (with-temp-buffer
+    (insert import)
+    (end-of-buffer)
+    (re-search-backward ".")
+    (forward-char)
+    (thing-at-point 'word)))
+
+
+(defmacro with-buffer-copy (&rest body)
+  `(lexical-let ((buffer-string-copy (buffer-string)))
+     (with-temp-buffer
+       (message buffer-string-copy)
+       (insert buffer-string-copy)
+       (beginning-of-buffer)
+       (progn ,@body))))
+
+(defun import-used-p (import)
+  (if (or
+       (ends-with import "_")
+       (ends-with import "}"))
+      t
+    ;; else see if the import symbol is used somewhere
+    (save-excursion
+      (with-buffer-copy
+       (delete-all-imports)
+       (beginning-of-buffer)
+       (re-search-forward (concat "\\W" (symbol-from-import import) "\\W") nil t)))))
 
