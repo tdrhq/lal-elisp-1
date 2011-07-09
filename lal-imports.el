@@ -75,7 +75,7 @@
           ((starts-with d "com.lal") "000")
           ((starts-with d "com.phonegap.lal") "001")
           ((starts-with d "java.") "100")
-          (t "001"))))
+          (t "002"))))
     (concat prefix d)))
 
 (defun add-newline-after-phonegap ()
@@ -142,3 +142,11 @@
        (beginning-of-buffer)
        (re-search-forward (concat "\\W" (symbol-from-import import) "\\W") nil t)))))
 
+(defun lal-add-import (import)
+  "add an import to the current file"
+  (interactive "sPackage or import: ")
+  (save-excursion
+    (beginning-of-buffer)
+    (forward-line)
+    (insert (concat "import " import "\n")))
+  (lal-reorder-imports))
