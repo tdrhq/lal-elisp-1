@@ -28,7 +28,7 @@
   "get the imports in the current buffer"
   (interactive)
   (mapcar 'remove-root-from-import (let ((imports (remove  nil (lal-run-for-lines
-                 (if (equal "import" (word-at-point))
+                 (if (equal "import" (thing-at-point 'word))
                      (import-on-line))))))
     imports)))
 
