@@ -104,6 +104,9 @@
 (defun lal-reorder-imports ()
   (interactive)
   (save-excursion
+    (beginning-of-buffer)
+    (forward-line)
+    (forward-line)
     (let ((old-imports (remove-if-not 'import-used-p (imports-in-buffer))))
       (delete-all-imports) 
       (mapc (lambda (val) (insert-string (concat "import " val "\n")))
@@ -148,5 +151,6 @@
   (save-excursion
     (beginning-of-buffer)
     (forward-line)
-    (insert (concat "import " import "\n")))
+    
+    (insert (concat "\nimport " import "\n")))
   (lal-reorder-imports))
