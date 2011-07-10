@@ -101,6 +101,14 @@
    (add-a-numeric-prefix-for-domain imp1)
    (add-a-numeric-prefix-for-domain imp2)))
 
+(defun lal-remove-multiple-empty-lines ()
+  (if (and
+       (eq ?\n (char-after))
+       (eq ?\n (char-after (+ (point) 1))))
+      (progn
+        (delete-char 1)
+        (lal-remove-multiple-empty-lines))))
+    
 (defun lal-reorder-imports ()
   (interactive)
   (save-excursion
@@ -112,8 +120,11 @@
       (mapc (lambda (val) (insert-string (concat "import " val "\n")))
             (sort old-imports 'lal-import-lessp))
 
-      (add-newline-after-phonegap)
-      (add-newline-before-java))))
+      (save-excursion
+        (add-newline-after-phonegap)
+        (add-newline-before-java))
+      
+      (lal-remove-multiple-empty-lines))))
 
 
 
