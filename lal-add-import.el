@@ -39,12 +39,16 @@
                             (concat classname ".java")))
                  file-list))
 
+(defun lal-trim-tag (tag)
+  (replace-regexp-in-string "^@" "" tag))
+
 (defun lal-add-import-s (tag)
   (interactive "sTag: ")
   "Import a 'known' package that has the same classname"
-  (let* ((matches (lal-find-by-classname (upcase-initials tag)))
-         (match (ido-completing-read "Choose import: " matches nil nil nil 'giit-history)))
-    (lal-add-import match)))
+  (let ((tag (lal-trim-tag tag)))
+    (let* ((matches (lal-find-by-classname (upcase-initials tag)))
+           (match (ido-completing-read "Choose import: " matches nil nil nil 'giit-history)))
+      (lal-add-import match))))
 
 (defun lal-add-import-t ()
   (interactive)
@@ -80,6 +84,7 @@
                       (replace-regexp-in-string "\\.class$\\|\\.java$\\|.*java/+\\|/$" "" package)))
 
 (defun noronha-jar-list (file)
+  (message "listing jar %s" file)
   (mapcar 'noronha-get-canonical-package
           (remove-if '(lambda  (file) (string-match "/$" file))
                      (split-string (shell-command-to-string (concat "jar -tf " file))))))
