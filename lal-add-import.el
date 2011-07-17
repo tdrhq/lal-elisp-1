@@ -52,14 +52,25 @@
 
 (global-set-key "\C-ci" 'lal-add-import-t)
 
+(setq-if-nil lal-android-jar "/home/opt/android/platforms/android-10/android.jar")
+
+;; A list of load jars
+(setq-if-nil lal-load-jars ())
+
 ;; find by classname
 (defun lal-find-by-classname (classname)
   (or 
    (lal-filter-imports-for-classname classname lal-safe-packages)
-   (lal-jar-find-for-classname lal-android-jar classname)))
+   (lal-jar-find-for-classname lal-android-jar classname)
+   (lal-jars-find-for-classname  lal-load-jars classname)))
 
 
-(setq lal-android-jar "/home/opt/android/platforms/android-10/android.jar")
+(defmacro setq-if-nil (sym val)
+  `(when (not (boundp (quote ,sym)))
+       (setq ,sym ,val)))
+  
+
+
 
 ;; jar file parsers
 
@@ -73,10 +84,18 @@
           (remove-if '(lambda  (file) (string-match "/$" file))
                      (split-string (shell-command-to-string (concat "jar -tf " file))))))
 (memoize 'noronha-jar-list)
-(noronha-jar-list lal-android-jar)
+
+(defun noronha-jars-list (file-list)
+  (apply 'nconc (mapcar 'noronha-jar-list file-list)))
+
 
 ;; A list of interesting jar files.
 (defun lal-jar-find-for-classname (jar classname)
   (message "finding %s in %s" classname jar)
-  (lal-filter-imports-for-classname classname (noronha-jar-list jar)))
+  (lal-jars-find-for-classname (list jar) classname))
 
+(defun lal-jars-find-for-classname (jar-list classname)
+  (lal-filter-imports-for-classname classname
+                                    (noronha-jars-list jar-list)))
+
+(noronha-jars-list lal-load-jars)
