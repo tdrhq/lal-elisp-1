@@ -15,6 +15,7 @@
 
 (setq lal-safe-packages
       (list "com.google.inject.Inject"
+            "com.google.inject.Provider"
        "java.util.List"
        "java.util.Set"
        "java.util.EnumSet"
