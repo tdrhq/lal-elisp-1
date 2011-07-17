@@ -1,4 +1,6 @@
-(provide 'lal-import)
+(provide 'lal-imports)
+
+(require 'lal-strings)
 
 (defmacro lal-run-for-lines-c (&rest f)
   "run a command for each line in the buffer"
@@ -32,18 +34,6 @@
                      (import-on-line))))))
     imports)))
 
-
-;; from noronha-imports
-(defun starts-with (str prefix)
-  (and
-   (< (length prefix) (length str))
-   (equal (substring str 0 (length prefix)) prefix)))
-
-(defun reverse-string (str)
-  (apply 'string (reverse (string-to-list str))))
-
-(defun ends-with (str prefix)
-  (starts-with (reverse-string str) (reverse-string prefix)))
 
 (defun remove-root-from-import (import)
   (if (starts-with import "_root_.")
