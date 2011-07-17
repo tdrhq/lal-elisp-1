@@ -38,6 +38,12 @@
          (match (ido-completing-read "Choose import: " matches nil nil nil 'giit-history)))
     (lal-add-import match)))
 
+(defun lal-add-import-t ()
+  (interactive)
+  (lal-add-import-s (current-word)))
+
+(global-set-key "\C-ci" 'lal-add-import-t)
+
 ;; find by classname
 (defun lal-find-by-classname (classname)
    (lal-filter-imports-for-classname classname lal-safe-packages))
