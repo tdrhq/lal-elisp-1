@@ -3,6 +3,7 @@
 
 (require 'lal-strings)
 (require 'lal-imports)
+(require 'memoize)
 
 ;; sexy code from previous version
 (defmacro noronha-with-if-not-changed-unmark-buffer (&rest body)
@@ -31,6 +32,13 @@
                            classname))
                  imports))
 
+;; same as above, but instead of packages, actual file names
+(defun lal-filter-file-names-for-classname (classname file-list)
+  (remove-if-not '(lambda (file-name)
+                     (equal (file-name-nondirectory file-name)
+                            (concat classname ".java")))
+                 file-list))
+
 (defun lal-add-import-s (tag)
   (interactive "sTag: ")
   "Import a 'known' package that has the same classname"
@@ -46,7 +54,29 @@
 
 ;; find by classname
 (defun lal-find-by-classname (classname)
-   (lal-filter-imports-for-classname classname lal-safe-packages))
+  (or 
+   (lal-filter-imports-for-classname classname lal-safe-packages)
+   (lal-jar-find-for-classname lal-android-jar classname)))
 
 
+(setq lal-android-jar "/home/opt/android/platforms/android-10/android.jar")
+
+;; jar file parsers
+
+(defun noronha-get-canonical-package (package)
+  (replace-regexp-in-string
+                      "/" "."
+                      (replace-regexp-in-string "\\.class$\\|\\.java$\\|.*java/+\\|/$" "" package)))
+
+(defun noronha-jar-list (file)
+  (mapcar 'noronha-get-canonical-package
+          (remove-if '(lambda  (file) (string-match "/$" file))
+                     (split-string (shell-command-to-string (concat "jar -tf " file))))))
+(memoize 'noronha-jar-list)
+(noronha-jar-list lal-android-jar)
+
+;; A list of interesting jar files.
+(defun lal-jar-find-for-classname (jar classname)
+  (message "finding %s in %s" classname jar)
+  (lal-filter-imports-for-classname classname (noronha-jar-list jar)))
 
