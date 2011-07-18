@@ -57,6 +57,10 @@
 
 (global-set-key "\C-ci" 'lal-add-import-t)
 
+(defmacro setq-if-nil (sym val)
+  `(when (not (boundp (quote ,sym)))
+       (setq ,sym ,val)))
+
 (setq-if-nil lal-android-jar "/home/opt/android/platforms/android-10/android.jar")
 
 ;; A list of load jars
@@ -70,19 +74,13 @@
    (lal-jars-find-for-classname  lal-load-jars classname)))
 
 
-(defmacro setq-if-nil (sym val)
-  `(when (not (boundp (quote ,sym)))
-       (setq ,sym ,val)))
-  
-
-
 
 ;; jar file parsers
 
 (defun noronha-get-canonical-package (package)
   (replace-regexp-in-string
-                      "/" "."
-                      (replace-regexp-in-string "\\.class$\\|\\.java$\\|.*java/+\\|/$" "" package)))
+   "/" "."
+   (replace-regexp-in-string "\\.class$\\|\\.java$\\|/$" "" package)))
 
 (defun noronha-jar-list (file)
   (message "listing jar %s" file)
