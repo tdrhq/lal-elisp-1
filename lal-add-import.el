@@ -87,7 +87,6 @@
   (mapcar 'noronha-get-canonical-package
           (remove-if '(lambda  (file) (string-match "/$" file))
                      (split-string (shell-command-to-string (concat "jar -tf " file))))))
-(memoize 'noronha-jar-list)
 
 (defun noronha-jars-list (file-list)
   (apply 'nconc (mapcar 'noronha-jar-list file-list)))
