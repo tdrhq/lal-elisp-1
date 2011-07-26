@@ -59,7 +59,6 @@
 
 
 (defun add-a-numeric-prefix-for-domain (d)
-  (message d)
   (let ((prefix
          (cond
           ((starts-with d "com.lal") "000")
