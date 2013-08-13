@@ -174,8 +174,6 @@
   "add an import to the current file"
   (interactive "sPackage or import: ")
   (save-excursion
-    (beginning-of-buffer)
-    (forward-line)
-    
-    (insert (concat "\nimport " import "\n")))
+    (lal-goto-first-import)
+    (insert (concat "import " import ";\n")))
   (lal-reorder-imports))
