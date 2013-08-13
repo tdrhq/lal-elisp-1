@@ -33,6 +33,9 @@
 
 (setf *current-workspace* nil)
 
+(defmethod workspace-root ((ws workspace))
+  (file-name-as-directory (oref ws :root)))
+
 
 (defun current-workspace ()
   *current-workspace*)
@@ -40,6 +43,33 @@
 (defmethod add-extern-jar  ((ws workspace) jar)
   "Convenience method to manipulate the extern-jars field"
   (oset ws :extern-jars (cons jar (oref ws :extern-jars))))
+
+(defmethod workspace-get-buffers ((ws workspace))
+  "Get all open buffers that we think belongs to the workspace"
+  (remove-if-not
+   '(lambda (a) (starts-with (buffer-file-name a) (workspace-root ws)))
+   (buffer-list)))
+
+(defmethod workspace-get-unsaved-buffers ((ws workspace))
+   (remove-if-not 'buffer-modified-p (workspace-get-buffers ws)))
+
+
+(defmethod workspace-switch-if-required ((ws workspace) (old-ws workspace) buffer)
+  "switch the given buffer to the new workspace if possible"
+  (let (old-file-name (expand-file-name (buffer-file-name buffer)))
+    ;; if the file is not from the workspace, skip it
+    (unless (starts-with (workspace-root ws) old-file-name)
+      ;; do stuff
+      t
+      )))
+    
+    
+
+  
+(defmethod workspace-switch ((ws workspace))
+  "Switch the current workspace to ws along with all opened buffers of the old workspace"
+  (mapcar (lambda (buffer) (workspace-switch-if-required ws buffer) (buffer-list))))
+  
 
 
               
