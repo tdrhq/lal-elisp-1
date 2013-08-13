@@ -1,6 +1,7 @@
 (provide 'lal-workspace)
 
 (require 'eieio)
+(require 'lal-workspace-list)
 
 (defclass workspace () 
   ((name :initarg :name
