@@ -65,14 +65,20 @@
 (setq-if-nil lal-android-jar "/home/opt/android/platforms/android-10/android.jar")
 
 ;; A list of load jars
-(setq-if-nil lal-load-jars ())
+(setq-if-nil *lal-load-jars* ())
+
+(defun lal-load-jars ()
+  (if (current-workspace)
+      (oref (current-workspace) :extern-jars)
+    (*lal-load-jars*)))
+  
 
 ;; find by classname
 (defun lal-find-by-classname (classname)
   (or 
    (lal-filter-imports-for-classname classname lal-safe-packages)
    (lal-jar-find-for-classname lal-android-jar classname)
-   (lal-jars-find-for-classname  lal-load-jars classname)))
+   (lal-jars-find-for-classname  (lal-load-jars) classname)))
 
 
 
@@ -102,4 +108,3 @@
   (lal-filter-imports-for-classname classname
                                     (noronha-jars-list jar-list)))
 
-(noronha-jars-list lal-load-jars)

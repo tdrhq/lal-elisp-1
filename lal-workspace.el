@@ -37,6 +37,10 @@
 (defun current-workspace ()
   *current-workspace*)
 
+(defmethod add-extern-jar  ((ws workspace) jar)
+  "Convenience method to manipulate the extern-jars field"
+  (oset ws :extern-jars (cons jar (oref ws :extern-jars))))
+
 
               
               
