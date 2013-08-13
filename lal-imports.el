@@ -129,7 +129,7 @@
   (interactive)
   (save-excursion
     (lal-goto-first-import)
-    (let ((old-imports (remove-if-not 'import-used-p (imports-in-buffer))))
+    (let ((old-imports (delete-dups (remove-if-not 'import-used-p (imports-in-buffer)))))
       (delete-all-imports) 
       (mapc (lambda (val) (insert-string (concat "import " val "\n")))
             (sort old-imports 'lal-import-lessp))
