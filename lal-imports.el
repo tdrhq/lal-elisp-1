@@ -56,15 +56,17 @@
       (go-to-last-import)
       (delete-region start (point)) )))
 
-
-
-(defun add-a-numeric-prefix-for-domain (d)
-  (let ((prefix
-         (cond
+(defun lal-domain-to-number (d)
+  "Given a domain, tell me which numbered section it should be in"
+  (cond
           ((starts-with d "com.lal") "000")
           ((starts-with d "com.phonegap.lal") "001")
           ((starts-with d "java.") "100")
-          (t "002"))))
+          (t "002")))
+
+(defun add-a-numeric-prefix-for-domain (d)
+  (let ((prefix
+         (lal-domain-to-number d)))
     (concat prefix d)))
 
 (defun add-newline-after-phonegap ()
@@ -102,7 +104,7 @@
   (interactive)
   (save-excursion
     (beginning-of-buffer)
-    (forward-line)
+    (re-search-forward "^package" nil t)
     (forward-line)
     (let ((old-imports (remove-if-not 'import-used-p (imports-in-buffer))))
       (delete-all-imports) 

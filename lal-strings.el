@@ -4,7 +4,7 @@
 ;; from noronha-imports
 (defun starts-with (str prefix)
   (and
-   (< (length prefix) (length str))
+   (<= (length prefix) (length str))
    (equal (substring str 0 (length prefix)) prefix)))
 
 (defun reverse-string (str)
