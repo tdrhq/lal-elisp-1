@@ -10,6 +10,16 @@
       (progn ,@f)
       (forward-line))))
 
+(defun lal-goto-first-import ()
+  "goto the first line where we expect an import to be"
+    (beginning-of-buffer)
+    (re-search-forward "^package" nil t)
+    (while (and 
+            (not (import-on-line)) 
+            (not (eq (point-max) (point))))
+      (forward-line)))
+
+
 (defmacro lal-run-for-lines (&rest f)
   "run a command for each line in the buffer and collect the return values"
   `(let ((lal-return-val ())) 
@@ -23,8 +33,9 @@
   (interactive)
   (save-excursion
     (beginning-of-line)
-    (re-search-forward "import \\(.*\\)")
-    (match-string 1)))
+    (when (equal (thing-at-point 'word) "import")
+      (when (re-search-forward "import \\(.*\\)" nil t)
+        (match-string 1)))))
 
 (defun imports-in-buffer ()
   "get the imports in the current buffer"
@@ -56,37 +67,45 @@
       (go-to-last-import)
       (delete-region start (point)) )))
 
-(defun lal-domain-to-number (d)
+(setf *lal:interesting-domains* 
+      '("javax" "java" "com.facebook" ""))
+
+(defun lal-domain-to-number (import)
   "Given a domain, tell me which numbered section it should be in"
-  (cond
-          ((starts-with d "com.lal") "000")
-          ((starts-with d "com.phonegap.lal") "001")
-          ((starts-with d "java.") "100")
-          (t "002")))
+  (number-to-string
+   (+ 100
+      (position t 
+                (mapcar (lambda (domain) (starts-with import domain)) *lal:interesting-domains* )))))
 
 (defun add-a-numeric-prefix-for-domain (d)
   (let ((prefix
          (lal-domain-to-number d)))
     (concat prefix d)))
 
-(defun add-newline-after-phonegap ()
+(defun import-on-next-line ()
   (save-excursion
-    (beginning-of-buffer)
-    (while (re-search-forward "^import com.phonegap.lal.*" nil t))
+    (forward-line)
+    (import-on-line)))
 
-    ;; be careful
-    (beginning-of-line)
-    (if (re-search-forward "^import com.phonegap.lal" nil t)
-        (progn (end-of-line)
-               (insert-char ?\n 1)))))
+(defun add-newlines-process-line ()
+  (when (import-on-next-line)
+    (when (not (equal
+                (lal-domain-to-number (import-on-line))
+                (lal-domain-to-number (import-on-next-line))))
+      (forward-line)
+      (insert-char ?\n 1))
+    (forward-line)
+    (add-newlines-process-line)))
+  ;; process the next line
 
-(defun add-newline-before-java ()
-  (save-excursion
-    (beginning-of-buffer)
-    (if (re-search-forward "^import java.*" nil t)
-        (progn (beginning-of-line)
-               (insert-char ?\n 1)))))
 
+(defun add-newlines-between-sections ()
+  (interactive)
+  "add a newline between each section of *lal:interesting-domains*"
+  (save-excursion 
+    (lal-goto-first-import)
+    (add-newlines-process-line)))
+  
 (defun lal-import-lessp (imp1 imp2)
   (string-lessp
    (add-a-numeric-prefix-for-domain imp1)
@@ -99,23 +118,27 @@
       (progn
         (delete-char 1)
         (lal-remove-multiple-empty-lines))))
-    
+   
+  
 (defun lal-reorder-imports ()
   (interactive)
   (save-excursion
-    (beginning-of-buffer)
-    (re-search-forward "^package" nil t)
-    (forward-line)
+    (lal-goto-first-import)
     (let ((old-imports (remove-if-not 'import-used-p (imports-in-buffer))))
       (delete-all-imports) 
       (mapc (lambda (val) (insert-string (concat "import " val "\n")))
             (sort old-imports 'lal-import-lessp))
 
-      (save-excursion
-        (add-newline-after-phonegap)
-        (add-newline-before-java))
+      (add-newlines-between-sections)
+      (lal-remove-multiple-empty-lines)
       
-      (lal-remove-multiple-empty-lines))))
+      ;; if there's no newline before the first import, add it
+      (lal-goto-first-import)
+      (forward-line -1)
+      (unless (eq (char-after) ?\n)
+        (forward-line)
+        (insert-char ?\n 1))
+      )))
 
 
 
