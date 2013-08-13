@@ -42,6 +42,7 @@
 
 (defun lal-trim-tag (tag)
   (replace-regexp-in-string "^@" "" tag))
+(setf giit-history '())
 
 (defun lal-add-import-s (tag)
   (interactive "sTag: ")
