@@ -17,7 +17,7 @@
               :initform '()
               :custom list
               :type list
-              :documentation "list of all root java directories")
+              :documentation "list of all root java directories relative to the root directory")
    (interesting-domains :initarg :interesting-domains
                         :initform '()
                         :custom list
@@ -41,6 +41,11 @@
 
 (defmethod workspace-root ((ws workspace))
   (file-name-as-directory (oref ws :root)))
+
+(defmethod workspace-get-absolute-src-roots ((ws workspace))
+  (mapcar (lambda (x)
+            (concat (workspace-root ws) x))
+          (oref ws :src-roots)))
 
 
 (defun current-workspace ()
@@ -81,6 +86,9 @@
            (let* ((new-files (delete-dups (append old-files (oref ws :open-files)))))
              (mapc 'find-file 
                    (mapcar (lambda (x) (concat (workspace-root ws) x)) new-files)))
+
+           ;; after all is done, let's setf the state
+           (setf *current-workspace* ws)
            )))
     
     

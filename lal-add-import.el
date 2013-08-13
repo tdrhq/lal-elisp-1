@@ -73,11 +73,22 @@
     (*lal-load-jars*)))
   
 
+(defun lal-src-find-for-classname (classname)
+  (lal-filter-imports-for-classname 
+   classname
+   (when (current-workspace)
+     (let ((src-roots (workspace-get-absolute-src-roots (current-workspace))))
+       (apply 'append (mapcar 'noronha-dir-list src-roots))))))
+
+
+  
+
 ;; find by classname
 (defun lal-find-by-classname (classname)
   (or 
    (lal-filter-imports-for-classname classname lal-safe-packages)
    (lal-jar-find-for-classname lal-android-jar classname)
+   (lal-src-find-for-classname  classname)
    (lal-jars-find-for-classname  (lal-load-jars) classname)))
 
 
@@ -94,6 +105,13 @@
   (mapcar 'noronha-get-canonical-package
           (remove-if '(lambda  (file) (string-match "/$" file))
                      (split-string (shell-command-to-string (concat "jar -tf " file))))))
+
+(defun noronha-dir-list (dir)
+  (message "listing dir %s" dir)
+  (mapcar 'noronha-get-canonical-package
+          (mapcar (lambda (x) (substring x 2)) 
+                  (remove-if '(lambda  (file) (or (string-match "/$" file) (not (string-match ".java$" file))))
+                             (split-string (shell-command-to-string (concat "cd " dir " && find .")))))))
 
 (defun noronha-jars-list (file-list)
   (apply 'nconc (mapcar 'noronha-jar-list file-list)))
