@@ -29,7 +29,13 @@
                 :initform '()
                 :custom list
                 :type list
-                :documentation "list of jars that are used externally")))
+                :documentation "list of jars that are used externally")
+   (open-files :initarg :open-files
+               :initform '()
+               :custom list
+               :type list
+               :documentation "internally maintained list/cache of all the files from the workspace that were kept open, it will be restored the next time the file is loaded")
+   ))
 
 (setf *current-workspace* nil)
 
@@ -54,21 +60,22 @@
    (remove-if-not 'buffer-modified-p (workspace-get-buffers ws)))
 
 
-(defmethod workspace-switch-if-required ((ws workspace) (old-ws workspace) buffer)
-  "switch the given buffer to the new workspace if possible"
-  (let (old-file-name (expand-file-name (buffer-file-name buffer)))
-    ;; if the file is not from the workspace, skip it
-    (unless (starts-with (workspace-root ws) old-file-name)
-      ;; do stuff
-      t
-      )))
+(defmethod workspace-switch ((ws workspace))
+  "Switch the current workspace to ws along with all opened buffers of the old workspace"
+  (if (workspace-get-unsaved-buffers (current-workspace))
+      (message "There are unsaved buffers: %s" (workspace-get-unsaved-buffers (current-workspace)))
+    ;; we've essentially decided we're good
+    (let* ((buffers (workspace-get-buffers (current-workspace)))
+           (old-files 
+            (mapcar 
+             (lambda (path) (substring (buffer-file-name path) (length (workspace-root (current-workspace)))))
+             buffers)))
+           (oset (current-workspace) :open-files old-files))))
     
     
 
   
-(defmethod workspace-switch ((ws workspace))
-  "Switch the current workspace to ws along with all opened buffers of the old workspace"
-  (mapcar (lambda (buffer) (workspace-switch-if-required ws buffer) (buffer-list))))
+
   
 
 
