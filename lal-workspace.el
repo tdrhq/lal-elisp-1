@@ -18,6 +18,13 @@
               :custom list
               :type list
               :documentation "list of all root java directories")
+   (interesting-domains :initarg :interesting-domains
+                        :initform '()
+                        :custom list
+                        :type list
+                        :documentation
+                        "each of this domains is stored into one separate section when ordering imports, in effect it's a style declaration")
+
    (extern-jars :initarg :extern-jars
                 :initform '()
                 :custom list
@@ -26,6 +33,9 @@
 
 (setf *current-workspace* nil)
 
+
+(defun current-workspace ()
+  *current-workspace*)
 
 
               

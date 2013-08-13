@@ -68,14 +68,19 @@
       (delete-region start (point)) )))
 
 (setf *lal:interesting-domains* 
-      '("javax" "java" "com.facebook" ""))
+      '("javax" "java" ""))
+
+(defun lal-interesting-domains ()
+  (if (current-workspace)
+      (oref (current-workspace) :interesting-domains)
+    *lal:interesting-domains*))
 
 (defun lal-domain-to-number (import)
   "Given a domain, tell me which numbered section it should be in"
   (number-to-string
    (+ 100
       (position t 
-                (mapcar (lambda (domain) (starts-with import domain)) *lal:interesting-domains* )))))
+                (mapcar (lambda (domain) (starts-with import domain)) (lal-interesting-domains) )))))
 
 (defun add-a-numeric-prefix-for-domain (d)
   (let ((prefix
