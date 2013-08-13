@@ -70,7 +70,18 @@
             (mapcar 
              (lambda (path) (substring (buffer-file-name path) (length (workspace-root (current-workspace)))))
              buffers)))
-           (oset (current-workspace) :open-files old-files))))
+           (oset (current-workspace) :open-files old-files)
+           
+           ;; close all the buffers
+           (mapc 'kill-buffer buffers)
+
+           ;; the files we want to open are all the old files, plus the files that were 
+           ;; already open in the other workspace
+
+           (let* ((new-files (delete-dups (append old-files (oref ws :open-files)))))
+             (mapc 'find-file 
+                   (mapcar (lambda (x) (concat (workspace-root ws) x)) new-files)))
+           )))
     
     
 
