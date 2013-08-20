@@ -19,7 +19,7 @@
                  *lal:workspace-list*)))
 
 (lal-workspace-as-strings)
-(lal-workspace-by-name "second")q
+(lal-workspace-by-name "second")
 
 
 (defun lal-switch-workspace ()
