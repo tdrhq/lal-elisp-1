@@ -48,7 +48,7 @@
   (interactive "sTag: ")
   "Import a 'known' package that has the same classname"
   (let ((tag (lal-trim-tag tag)))
-    (let* ((matches (lal-find-by-classname (upcase-initials tag)))
+    (let* ((matches (delete-dups (lal-find-by-classname (upcase-initials tag))))
            (match (ido-completing-read "Choose import: " matches nil nil nil 'giit-history)))
       (lal-add-import match))))
 
