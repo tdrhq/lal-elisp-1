@@ -62,9 +62,6 @@
   `(when (not (boundp (quote ,sym)))
        (setq ,sym ,val)))
 
-(setq-if-nil lal-android-jar "/home/opt/android/platforms/android-10/android.jar")
-
-;; A list of load jars
 (setq-if-nil *lal-load-jars* ())
 
 (defun lal-load-jars ()
@@ -87,7 +84,6 @@
 (defun lal-find-by-classname (classname)
   (append 
    (lal-filter-imports-for-classname classname lal-safe-packages)
-   (lal-jar-find-for-classname lal-android-jar classname)
    (lal-src-find-for-classname  classname)
    (lal-jars-find-for-classname  (lal-load-jars) classname)))
 
