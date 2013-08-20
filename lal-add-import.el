@@ -85,7 +85,7 @@
 
 ;; find by classname
 (defun lal-find-by-classname (classname)
-  (or 
+  (append 
    (lal-filter-imports-for-classname classname lal-safe-packages)
    (lal-jar-find-for-classname lal-android-jar classname)
    (lal-src-find-for-classname  classname)
