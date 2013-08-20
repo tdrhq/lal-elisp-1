@@ -91,7 +91,7 @@
 (setf lal-find-file-history ())
 (defun lal-find-file-for-classname-interactive (classname)
   (interactive (list (read-string (format "Classname (%s): " (thing-at-point 'word))
-                             nil nil (thing-at-point 'word)))
+                             nil nil (thing-at-point 'word))))
   (find-file (ido-completing-read "Choose file: " (lal-find-file-for-classname classname) nil nil nil 'lal-find-file-history)))
 
 (global-set-key "\C-cg" 'lal-find-file-for-classname-interactive)
