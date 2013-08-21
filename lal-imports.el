@@ -67,7 +67,7 @@
       (go-to-last-import)
       (delete-region start (point)) )))
 
-(setf *lal:interesting-domains* 
+(setq *lal:interesting-domains* 
       '("javax" "java" ""))
 
 (defun lal-interesting-domains ()
