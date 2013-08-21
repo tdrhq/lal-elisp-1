@@ -14,7 +14,8 @@
 (require 'lal-workspace)
 
 (defun safe-load (x)
-  (unless (ends-with x "test.el")
+  (unless (ends-with x "/test.el")
+    (message (concat "Loading: " x))
     (load x)))
 ;; load all el files in the directory
 (mapc 'safe-load
