@@ -72,7 +72,7 @@
 
 (defun lal-interesting-domains ()
   (if (current-workspace)
-      (oref (current-workspace) :interesting-domains)
+      (interesting-domains (current-workspace))
     *lal:interesting-domains*))
 
 (defun lal-domain-to-number (import)
