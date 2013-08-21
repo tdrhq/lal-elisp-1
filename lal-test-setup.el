@@ -14,15 +14,17 @@
   (delete-directory dir t))
 
 (defmacro with-temp-project (&rest body)
-  `(let ((tmp (lal-create-temp-project)))
+  `(let ((temp-project-dir (lal-create-temp-project)))
      (unwind-protect (progn ,@body)
-       (lal-delete-temp-project tmp))))
+       (lal-delete-temp-project temp-project-dir))))
   
 
 ;; touch a filename
 (defun lal-touch (dir file)
-  (validate-dir)
+  (validate-dir dir)
   (let ((abs (concat dir "/" file)))
+    ;; create all parent directories
+    (make-directory (file-name-directory abs) t)
     (write-region "" nil abs)))
 
 
