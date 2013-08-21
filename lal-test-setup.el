@@ -25,7 +25,8 @@
   (let ((abs (concat dir "/" file)))
     ;; create all parent directories
     (make-directory (file-name-directory abs) t)
-    (write-region "" nil abs)))
+    (write-region "" nil abs)
+    abs))
 
 
 

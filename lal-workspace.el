@@ -44,9 +44,10 @@
   (file-name-as-directory (oref ws :root)))
 
 (defmethod workspace-get-absolute-src-roots ((ws workspace))
-  (mapcar (lambda (x)
-            (concat (workspace-root ws) x))
-          (oref ws :src-roots)))
+  (mapcar 'expand-file-name 
+          (mapcar (lambda (x)
+                    (concat (workspace-root ws) x "/"))
+                  (oref ws :src-roots))))
 
 
 (defun current-workspace ()
