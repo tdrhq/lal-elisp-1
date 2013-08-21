@@ -21,6 +21,12 @@
                        :root "/tmp/u")))
     (add-extern-jar ws "/tmp/a.jar")
     (should (equal '("/tmp/a.jar") (extern-jars ws)))))
+
+(ert-deftest lal-workdpsace-root ()
+  (let ((ws (workspace "foo"
+                       :root "/tmp/u")))
+    (should (equal "/tmp/u/" (workspace-root ws)))))
+  
                        
 
   

@@ -13,6 +13,7 @@
          :initform ""
          :custom string
          :type string
+         :accessor root
          :documentation "the root dir of the worksapce")
    (src-roots :initarg :src-roots
               :initform '()
@@ -38,13 +39,15 @@
                :initform '()
                :custom list
                :type list
+               :accessor open-files
+               :writer set-open-files
                :documentation "internally maintained list/cache of all the files from the workspace that were kept open, it will be restored the next time the file is loaded")
    ))
 
 (setf *current-workspace* nil)
 
 (defmethod workspace-root ((ws workspace))
-  (file-name-as-directory (oref ws :root)))
+  (file-name-as-directory (root ws)))
 
 (defmethod workspace-get-absolute-src-roots ((ws workspace))
   (mapcar 'expand-file-name 
@@ -80,7 +83,7 @@
             (mapcar 
              (lambda (path) (substring (buffer-file-name path) (length (workspace-root (current-workspace)))))
              buffers)))
-           (oset (current-workspace) :open-files old-files)
+           (set-open-files (current-workspace) old-files)
            
            ;; close all the buffers
            (mapc 'kill-buffer buffers)
@@ -88,7 +91,7 @@
            ;; the files we want to open are all the old files, plus the files that were 
            ;; already open in the other workspace
 
-           (let* ((new-files (delete-dups (append old-files (oref ws :open-files)))))
+           (let* ((new-files (delete-dups (append old-files (open-files ws)))))
              (mapc 'find-file 
                    (mapcar (lambda (x) (concat (workspace-root ws) x)) new-files)))
 
