@@ -31,6 +31,8 @@
                 :initform '()
                 :custom list
                 :type list
+                :accessor extern-jars
+                :writer set-extern-jars
                 :documentation "list of jars that are used externally")
    (open-files :initarg :open-files
                :initform '()
@@ -56,7 +58,7 @@
 
 (defmethod add-extern-jar  ((ws workspace) jar)
   "Convenience method to manipulate the extern-jars field"
-  (oset ws :extern-jars (cons jar (oref ws :extern-jars))))
+  (set-extern-jars ws (cons jar (extern-jars ws))))
 
 (defmethod workspace-get-buffers ((ws workspace))
   "Get all open buffers that we think belongs to the workspace"

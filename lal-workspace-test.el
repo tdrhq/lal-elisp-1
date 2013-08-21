@@ -14,6 +14,13 @@
      (should (equal 
               '("/tmp/u/a/b/" "/tmp/u/")
               (workspace-get-absolute-src-roots ws))))))
-   
+
+
+(ert-deftest lal-workspace-add-exter-jar-test ()
+  (let ((ws (workspace "foo"
+                       :root "/tmp/u")))
+    (add-extern-jar ws "/tmp/a.jar")
+    (should (equal '("/tmp/a.jar") (extern-jars ws)))))
+                       
 
   
