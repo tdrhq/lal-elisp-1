@@ -47,7 +47,7 @@
 
 (defun lal-trim-tag (tag)
   (replace-regexp-in-string "^@" "" tag))
-(setf giit-history '())
+(setq giit-history '())
 
 (defun lal-add-import-s (tag)
   (interactive "sTag: ")
@@ -88,10 +88,10 @@
                      (lambda (x) (mapcar (lambda (y) (concat x "/" y)) (lal-find-file-for-classname-in-dir classname x)))
                      src-roots)))))
 
-(setf lal-find-file-history ())
+(setq lal-find-file-history ())
 (defun lal-find-file-for-classname-interactive (classname)
   (interactive (list (read-string (format "Classname (%s): " (thing-at-point 'word))
-                             nil nil (thing-at-point 'word)))
+                             nil nil (thing-at-point 'word))))
   (find-file (ido-completing-read "Choose file: " (lal-find-file-for-classname classname) nil nil nil 'lal-find-file-history)))
 
 (global-set-key "\C-cg" 'lal-find-file-for-classname-interactive)
