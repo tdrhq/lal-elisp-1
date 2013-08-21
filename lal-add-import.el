@@ -71,7 +71,7 @@
 
 (defun lal-load-jars ()
   (if (current-workspace)
-      (oref (current-workspace) :extern-jars)
+      (extern-jars (current-workspace))
     (*lal-load-jars*)))
   
 
