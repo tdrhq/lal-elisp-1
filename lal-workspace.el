@@ -16,6 +16,7 @@
          :documentation "the root dir of the worksapce")
    (src-roots :initarg :src-roots
               :initform '()
+              :accessor src-roots
               :custom list
               :type list
               :documentation "list of all root java directories relative to the root directory")
@@ -47,7 +48,7 @@
   (mapcar 'expand-file-name 
           (mapcar (lambda (x)
                     (concat (workspace-root ws) x "/"))
-                  (oref ws :src-roots))))
+                  (src-roots ws))))
 
 
 (defun current-workspace ()
