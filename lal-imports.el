@@ -11,12 +11,17 @@
       (forward-line))))
 
 (defun lal-goto-first-import ()
-  "goto the first line where we expect an import to be"
+  "goto the first line where we expect an import to be if there's no
+  import go to the line after the package directive"
     (beginning-of-buffer)
     (re-search-forward "^package" nil t)
     (while (and 
             (not (import-on-line)) 
             (not (eq (point-max) (point))))
+      (forward-line))
+    (when (eq (point-max) (point))
+        (beginning-of-buffer)
+      (re-search-forward "^package" nil t)
       (forward-line)))
 
 
