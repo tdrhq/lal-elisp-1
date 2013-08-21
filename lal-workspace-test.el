@@ -30,3 +30,6 @@
                        
 
   
+(ert-deftest lal-interesting-domains-test ()
+  (let ((ws (workspace "foo" :interesting-domains '("java"))))
+    (should (equal '("java") (interesting-domains ws)))))

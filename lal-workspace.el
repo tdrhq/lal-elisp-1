@@ -25,9 +25,8 @@
                         :initform '()
                         :custom list
                         :type list
-                        :documentation
                         :accessor interesting-domains
-                        "each of this domains is stored into one separate section when ordering imports, in effect it's a style declaration")
+                        :documentation  "each of this domains is stored into one separate section when ordering imports, in effect it's a style declaration")
 
    (extern-jars :initarg :extern-jars
                 :initform '()
