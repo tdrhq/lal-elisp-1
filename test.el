@@ -1,7 +1,8 @@
 #!/usr/bin/emacs --script
 ;; runs all the tests in the project
 
-(add-to-list 'load-path (file-name-directory load-file-name))
+(setq mydir (file-name-directory load-file-name))
+(add-to-list 'load-path mydir)
 
 (message "add-import")
 
@@ -11,5 +12,12 @@
 
 (message "workspace")
 (require 'lal-workspace)
+
+(defun safe-load (x)
+  (unless (ends-with x "test.el")
+    (load x)))
+;; load all el files in the directory
+(mapc 'safe-load
+      (remove-if-not (lambda (x) (ends-with x ".el")) (directory-files mydir t)))
 
 (ert-run-tests-batch)
