@@ -3,7 +3,7 @@
 (require 'eieio)
 (require 'lal-workspace-list)
 
-(defclass workspace () 
+(defclass workspace (ede-project)
   ((name :initarg :name
          :initform ""
          :custom string
@@ -37,7 +37,6 @@
                :type list
                :documentation "internally maintained list/cache of all the files from the workspace that were kept open, it will be restored the next time the file is loaded")
    ))
-
 
 (setf *current-workspace* nil)
 

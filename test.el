@@ -4,6 +4,9 @@
 (setq mydir (file-name-directory load-file-name))
 (add-to-list 'load-path mydir)
 
+;; Enable EDE (Project Management) features
+(global-ede-mode 1)
+
 (message "add-import")
 
 (require 'lal-add-import)
@@ -20,5 +23,7 @@
 ;; load all el files in the directory
 (mapc 'safe-load
       (remove-if-not (lambda (x) (ends-with x ".el")) (directory-files mydir t)))
+
+
 
 (ert-run-tests-batch)
