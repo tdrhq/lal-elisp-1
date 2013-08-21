@@ -147,13 +147,24 @@
 
 
 
+
 (defun symbol-from-import (import)
   (with-temp-buffer
     (insert import)
     (end-of-buffer)
-    (re-search-backward ".")
+    (re-search-backward "\\.")
     (forward-char)
     (thing-at-point 'word)))
+
+(ert-deftest symbol-from-import-test ()
+  (should (equal "FooBar" (symbol-from-import "com.foo.FooBar")))
+  (should (equal "Foo" (symbol-from-import "com.foo.Bar.Foo"))))
+
+(ert-deftest symbol-from-import-test-with-semicolon-and-space ()
+  (should (equal "Foo" (symbol-from-import "com.foo.Foo ;"))))
+
+(ert-deftest symbol-from-import-test-with-semicolon ()
+  (should (equal "Foo" (symbol-from-import "com.foo.Foo;"))))
 
 
 (defmacro with-buffer-copy (&rest body)

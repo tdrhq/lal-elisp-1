@@ -27,6 +27,11 @@
   "switch between workspaces"
   (let ((chosen (ido-completing-read "Select workspace: " (lal-workspace-as-strings))))
     (workspace-switch (lal-workspace-by-name chosen))))
+
+(defun workspace-compile (cmd)
+  (interactive "sCommand: ")
+  "runs a compilation in the given workspace"
+  (compile (concat "cd " (workspace-root (current-workspace)) " && " cmd)))
   
                        
   

@@ -40,6 +40,11 @@
                             (concat classname ".java")))
                  file-list))
 
+(ert-deftest lal-filter-file-names-for-classname ()
+  (let ((files (list "a/b/C.java" "a/C.java" "a/B.java")))
+    (should (equal '("a/B.java") (lal-filter-file-names-for-classname "B" files)))
+    (should (equal '("a/b/C.java" "a/C.java") (lal-filter-file-names-for-classname "C" files)))))
+
 (defun lal-trim-tag (tag)
   (replace-regexp-in-string "^@" "" tag))
 (setf giit-history '())
@@ -48,7 +53,7 @@
   (interactive "sTag: ")
   "Import a 'known' package that has the same classname"
   (let ((tag (lal-trim-tag tag)))
-    (let* ((matches (lal-find-by-classname (upcase-initials tag)))
+    (let* ((matches (delete-dups (lal-find-by-classname (upcase-initials tag))))
            (match (ido-completing-read "Choose import: " matches nil nil nil 'giit-history)))
       (lal-add-import match))))
 
@@ -62,9 +67,6 @@
   `(when (not (boundp (quote ,sym)))
        (setq ,sym ,val)))
 
-(setq-if-nil lal-android-jar "/home/opt/android/platforms/android-10/android.jar")
-
-;; A list of load jars
 (setq-if-nil *lal-load-jars* ())
 
 (defun lal-load-jars ()
@@ -72,6 +74,28 @@
       (oref (current-workspace) :extern-jars)
     (*lal-load-jars*)))
   
+
+
+(defun lal-find-file-for-classname-in-dir (classname dir)
+  (let ((dir-listing (noronha-dir-list-files dir)))
+    (lal-filter-file-names-for-classname classname dir-listing)))
+
+(defun lal-find-file-for-classname (classname)
+  (remove-if-not 'identity
+                 (append
+                  (let* ((src-roots (workspace-get-absolute-src-roots (current-workspace))))
+                    (mapcar 
+                     (lambda (x) (mapcar (lambda (y) (concat x "/" y)) (lal-find-file-for-classname-in-dir classname x)))
+                     src-roots)))))
+
+(setf lal-find-file-history ())
+(defun lal-find-file-for-classname-interactive (classname)
+  (interactive (list (read-string (format "Classname (%s): " (thing-at-point 'word))
+                             nil nil (thing-at-point 'word)))
+  (find-file (ido-completing-read "Choose file: " (lal-find-file-for-classname classname) nil nil nil 'lal-find-file-history)))
+
+(global-set-key "\C-cg" 'lal-find-file-for-classname-interactive)
+
 
 (defun lal-src-find-for-classname (classname)
   (lal-filter-imports-for-classname 
@@ -85,9 +109,8 @@
 
 ;; find by classname
 (defun lal-find-by-classname (classname)
-  (or 
+  (append 
    (lal-filter-imports-for-classname classname lal-safe-packages)
-   (lal-jar-find-for-classname lal-android-jar classname)
    (lal-src-find-for-classname  classname)
    (lal-jars-find-for-classname  (lal-load-jars) classname)))
 
@@ -108,10 +131,13 @@
 
 (defun noronha-dir-list (dir)
   (message "listing dir %s" dir)
-  (mapcar 'noronha-get-canonical-package
-          (mapcar (lambda (x) (substring x 2)) 
-                  (remove-if '(lambda  (file) (or (string-match "/$" file) (not (string-match ".java$" file))))
-                             (split-string (shell-command-to-string (concat "cd " dir " && find .")))))))
+  (mapcar 'noronha-get-canonical-package (noronha-dir-list-files dir)))
+
+
+(defun noronha-dir-list-files (dir)
+  (mapcar (lambda (x) (substring x 2)) 
+          (remove-if '(lambda  (file) (or (string-match "/$" file) (not (string-match ".java$" file))))
+                     (split-string (shell-command-to-string (concat "cd " dir " && find ."))))))
 
 (defun noronha-jars-list (file-list)
   (apply 'nconc (mapcar 'noronha-jar-list file-list)))
