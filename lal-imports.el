@@ -10,6 +10,21 @@
       (progn ,@f)
       (forward-line))))
 
+(defun lal-get-package ()
+  (save-excursion
+    (beginning-of-buffer)
+    (re-search-forward "package ")
+    (buffer-substring (point) (progn
+                                (re-search-forward ";")
+                                (backward-char)
+                                (point)))))
+
+(ert-deftest lal-get-package-test ()
+  (with-temp-buffer
+    (insert "package foo.bar;\n\n")
+    (should (equal "foo.bar" (lal-get-package)))))
+                                
+  
 (defun lal-goto-first-import ()
   "goto the first line where we expect an import to be if there's no
   import go to the line after the package directive"
@@ -129,6 +144,8 @@
         (delete-char 1)
         (lal-remove-multiple-empty-lines))))
    
+
+
   
 (defun lal-reorder-imports ()
   (interactive)
@@ -179,17 +196,27 @@
        (beginning-of-buffer)
        (progn ,@body))))
 
+(defun lal-is-import-in-package (import package)
+  (let ((lst (car (last (split-string import "\\.")))))
+    (equal import (concat package "." lst))))
+
+(ert-deftest lal-is-import-in-package-test ()
+  (should (lal-is-import-in-package "a.b.C" "a.b"))
+  (should (not (lal-is-import-in-package "a.b.C" "a"))))
+
 (defun import-used-p (import)
-  (if (or
-       (ends-with import "_")
-       (ends-with import "}"))
-      t
-    ;; else see if the import symbol is used somewhere
-    (save-excursion
-      (with-buffer-copy
-       (delete-all-imports)
-       (beginning-of-buffer)
-       (re-search-forward (concat "\\W" (symbol-from-import import) "\\W") nil t)))))
+  (if (lal-is-import-in-package import (lal-get-package))
+      nil ;; not being used since it's from the current package
+    (if (or
+         (ends-with import "_")
+         (ends-with import "}"))
+        t
+      ;; else see if the import symbol is used somewhere
+      (save-excursion
+        (with-buffer-copy
+         (delete-all-imports)
+         (beginning-of-buffer)
+         (re-search-forward (concat "\\W" (symbol-from-import import) "\\W") nil t))))))
 
 (defun lal-add-import (import)
   "add an import to the current file"
