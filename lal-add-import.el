@@ -134,11 +134,6 @@
   (mapcar 'noronha-get-canonical-package (noronha-dir-list-files dir)))
 
 
-(defun noronha-dir-list-files (dir)
-  (mapcar (lambda (x) (substring x 2)) 
-          (remove-if '(lambda  (file) (or (string-match "/$" file) (not (string-match ".java$" file))))
-                     (split-string (shell-command-to-string (concat "cd " dir " && find ."))))))
-
 (defun noronha-jars-list (file-list)
   (apply 'nconc (mapcar 'noronha-jar-list file-list)))
 

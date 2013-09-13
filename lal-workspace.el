@@ -98,7 +98,35 @@
            ;; after all is done, let's setf the state
            (setf *current-workspace* ws)
            )))
-    
-    
+
+(defmethod workspace-is-file-managed ((ws workspace) file)
+  t)
+
+
+(defun noronha-flatten (mylist)
+  (cond
+   ((null mylist) nil)
+   ((atom mylist) (list mylist))
+   (t
+    (append (noronha-flatten (car mylist)) (noronha-flatten (cdr mylist))))))
+ 
+(defun noronha-dir-list-files (dir)
+  (let ((dirs (noronha-flatten (list dir))))
+    (noronha-flatten (mapcar (lambda (dir)
+              (mapcar (lambda (x) (substring x 2)) 
+                      (remove-if '(lambda  (file) (or (string-match "/$" file) (not (string-match ".java$" file))))
+                                 (split-string (shell-command-to-string (concat "cd " dir " && find ."))))))
+            dirs))))
+
+(message "what the fuck doode")
+
+(ert-deftest noronha-dir-list-files ()
+  (let ((fixtures (concat (file-name-directory load-file-name) "/fixtures")))
+    (should (find "One.java" (noronha-dir-list-files fixtures) :test 'equal))
+    (should (find "One.java" (noronha-dir-list-files (list fixtures)) :test 'equal))
+    (should (find "One.java" (noronha-dir-list-files (list fixtures "/tmp")) :test 'equal))
+    ))
+
+  
    
         

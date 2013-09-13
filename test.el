@@ -25,5 +25,5 @@
       (remove-if-not (lambda (x) (ends-with x ".el")) (directory-files mydir t)))
 
 
-
+(message "Going to run tests")
 (ert-run-tests-batch)
