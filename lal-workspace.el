@@ -130,24 +130,27 @@
 
 (ert-deftest noronha-flatten-recursive ()
   (should (equal nil (noronha-flatten nil)))
-  (should (equal (nil) (noronha-flatten (nil))))
+  (should (equal (list nil) (noronha-flatten (list nil))))
   (should (equal nil (noronha-flatten '())))
   (noronha-flatten (loop for i from 1 to 1000 collect i)))
 
  
 (defun noronha-dir-list-files (dir)
-  (let ((dirs (noronha-flatten (list dir))))
-    (noronha-flatten (mapcar (lambda (dir)
-              (mapcar (lambda (x) (substring x 2)) 
-                      (remove-if '(lambda  (file) (or (string-match "/$" file) (not (string-match ".java$" file))))
-                                 (split-string (shell-command-to-string (concat "cd " dir " && find ."))))))
-            dirs))))
+  (remove-if-not 
+   'identity
+   (let ((dirs (noronha-flatten (list dir))))
+     (noronha-flatten (mapcar (lambda (dir)
+                                (mapcar (lambda (x) (substring x 2)) 
+                                        (remove-if '(lambda  (file) (or (string-match "/$" file) (not (string-match ".java$" file))))
+                                                   (split-string (shell-command-to-string (concat "cd " dir " && find ."))))))
+                              dirs)))))
 
 (ert-deftest noronha-dir-list-files ()
   (let ((fixtures (concat (lal-project-dir) "/fixtures")))
     (should (find "One.java" (noronha-dir-list-files fixtures) :test 'equal))
     (should (find "One.java" (noronha-dir-list-files (list fixtures)) :test 'equal))
     (should (find "One.java" (noronha-dir-list-files (list fixtures "/tmp")) :test 'equal))
+    (should (equal nil (noronha-dir-list-files "/doesnotexist")))
     ))
 
   
