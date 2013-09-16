@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (provide 'lal-workspace)
 
 (require 'eieio)
@@ -103,12 +105,35 @@
   t)
 
 
-(defun noronha-flatten (mylist)
-  (cond
-   ((null mylist) nil)
-   ((atom mylist) (list mylist))
-   (t
-    (append (noronha-flatten (car mylist)) (noronha-flatten (cdr mylist))))))
+(defun noronha-flatten (list)
+  (cond ((null list) nil)
+        ((atom list) list)
+        (t
+         (let ((old list)
+               (new ())
+               item)
+           (while old
+             (if (atom old)             ; From consp with non-nil cdr.
+                 (setq item old
+                       old nil)
+               (setq item (car old)
+                     old (cdr old)))
+             ;; Make item atomic.
+             (while (consp item)
+               (if (cdr item)
+                   (setq old (cons (cdr item) old)))
+               (setq item (car item)))
+             (setq new (cons item new)))
+           (reverse new)))))
+
+
+
+(ert-deftest noronha-flatten-recursive ()
+  (should (equal nil (noronha-flatten nil)))
+  (should (equal (nil) (noronha-flatten (nil))))
+  (should (equal nil (noronha-flatten '())))
+  (noronha-flatten (loop for i from 1 to 1000 collect i)))
+
  
 (defun noronha-dir-list-files (dir)
   (let ((dirs (noronha-flatten (list dir))))
@@ -118,10 +143,8 @@
                                  (split-string (shell-command-to-string (concat "cd " dir " && find ."))))))
             dirs))))
 
-(message "what the fuck doode")
-
 (ert-deftest noronha-dir-list-files ()
-  (let ((fixtures (concat (file-name-directory load-file-name) "/fixtures")))
+  (let ((fixtures (concat (lal-project-dir) "/fixtures")))
     (should (find "One.java" (noronha-dir-list-files fixtures) :test 'equal))
     (should (find "One.java" (noronha-dir-list-files (list fixtures)) :test 'equal))
     (should (find "One.java" (noronha-dir-list-files (list fixtures "/tmp")) :test 'equal))

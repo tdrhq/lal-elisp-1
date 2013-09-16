@@ -3,6 +3,12 @@
 
 (provide 'lal-test-setup)
 
+(defun lal-project-dir ()
+  "Get the project dir to use for this"
+  (if load-file-name
+      (file-name-directory load-file-name)
+    "/home/arnold/builds/lal-elisp"))
+
 (defun validate-dir (dir)
   (should (starts-with dir "/tmp"))) ;; verify we're not deleting something major
 

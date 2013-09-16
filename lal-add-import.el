@@ -42,6 +42,7 @@
 
 (ert-deftest lal-filter-file-names-for-classname ()
   (let ((files (list "a/b/C.java" "a/C.java" "a/B.java")))
+    (should (equal '() (lal-filter-file-names-for-classname "Fooey" files)))
     (should (equal '("a/B.java") (lal-filter-file-names-for-classname "B" files)))
     (should (equal '("a/b/C.java" "a/C.java") (lal-filter-file-names-for-classname "C" files)))))
 
@@ -79,6 +80,11 @@
 (defun lal-find-file-for-classname-in-dir (classname dir)
   (let ((dir-listing (noronha-dir-list-files dir)))
     (lal-filter-file-names-for-classname classname dir-listing)))
+
+(ert-deftest lal-find-file-for-classname-in-dir ()
+  (let ((fixtures (concat (lal-project-dir) "/fixtures")))
+    (should (equal (list "One.java") (lal-find-file-for-classname-in-dir "One" fixtures)))
+    (should (equal '() (lal-find-file-for-classname-in-dir "DoesNotExist" fixtures)))))
 
 (defun lal-find-file-for-classname (classname)
   (remove-if-not 'identity
