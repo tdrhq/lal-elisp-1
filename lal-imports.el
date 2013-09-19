@@ -113,14 +113,13 @@
     (import-on-line)))
 
 (defun add-newlines-process-line ()
-  (when (import-on-next-line)
+  (while (import-on-next-line)
     (when (not (equal
                 (lal-domain-to-number (import-on-line))
                 (lal-domain-to-number (import-on-next-line))))
       (forward-line)
       (insert-char ?\n 1))
-    (forward-line)
-    (add-newlines-process-line)))
+    (forward-line)))
   ;; process the next line
 
 
