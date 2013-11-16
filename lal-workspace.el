@@ -44,6 +44,11 @@
                :accessor open-files
                :writer set-open-files
                :documentation "internally maintained list/cache of all the files from the workspace that were kept open, it will be restored the next time the file is loaded")
+
+   (import-tag-hash :initform nil
+                    :accessor import-tag-hash
+                    :writer set-import-tag-hash
+                    :documentation "a table of tags to list of filenames that satisify that tag")
    ))
 
 (setf *current-workspace* nil)

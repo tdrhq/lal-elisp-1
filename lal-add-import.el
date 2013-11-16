@@ -26,10 +26,14 @@
        "java.util.Arrays"))
 
 
+(defun lal-get-classname-from-import (import)
+  (car (last (split-string import "\\."))))
+
+
 (defun lal-filter-imports-for-classname (classname imports)
   "filter the given imports, for imports that have the given classname"
   (remove-if-not '(lambda (import)
-                    (equal (car (last (split-string import "\\.")))
+                    (equal (lal-get-classname-from-import import)
                            classname))
                  imports))
 
@@ -77,6 +81,7 @@
   
 
 
+
 (defun lal-find-file-for-classname-in-dir (classname dir)
   (let ((dir-listing (noronha-dir-list-files dir)))
     (lal-filter-file-names-for-classname classname dir-listing)))
@@ -103,12 +108,25 @@
 (global-set-key "\C-cg" 'lal-find-file-for-classname-interactive)
 
 
+(defun lal-src-to-import-hash (workspace)
+  (or
+   (import-tag-hash workspace)
+   (set-import-tag-hash workspace 
+                        (let ((hash (makehash 'equal)))
+                          ;; get the list of all files
+                          (mapc
+                           (lambda (file)
+                             (let*
+                                 ((import (lal-get-classname-from-import file))
+                                  (oldhash (or (gethash import hash) '())))
+                               (puthash import (cons file oldhash) hash)))
+                           (let ((src-roots (workspace-get-absolute-src-roots workspace)))
+                             (apply 'append (mapcar 'noronha-dir-list src-roots))))
+                          hash))))
+   
+
 (defun lal-src-find-for-classname (classname)
-  (lal-filter-imports-for-classname 
-   classname
-   (when (current-workspace)
-     (let ((src-roots (workspace-get-absolute-src-roots (current-workspace))))
-       (apply 'append (mapcar 'noronha-dir-list src-roots))))))
+  (gethash classname (or (lal-src-to-import-hash (current-workspace)) '())))
 
 
   
