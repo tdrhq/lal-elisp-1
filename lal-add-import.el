@@ -49,30 +49,9 @@
      (if (equal old-string (buffer-string))
          (set-buffer-modified-p old-buffer-modified-p))))
 
-
-(setq lal-safe-packages
-      (list "com.google.inject.Inject"
-            "com.google.inject.Provider"
-       "java.util.List"
-       "java.util.Set"
-       "java.util.EnumSet"
-       "java.util.Comparator"
-       "java.util.SortedSet"
-       "java.util.Locale"
-       "java.lang.IllegalStateException"
-       "java.util.Arrays"))
-
-
 (defun lal-get-classname-from-import (import)
   (car (last (split-string import "\\."))))
 
-
-(defun lal-filter-imports-for-classname (classname imports)
-  "filter the given imports, for imports that have the given classname"
-  (remove-if-not '(lambda (import)
-                    (equal (lal-get-classname-from-import import)
-                           classname))
-                 imports))
 
 ;; same as above, but instead of packages, actual file names
 (defun lal-filter-file-names-for-classname (classname file-list)
