@@ -4,8 +4,9 @@
 
 (require 'eieio)
 (require 'lal-workspace-list)
+(require 'ede/java-root)
 
-(defclass workspace (ede-project)
+(defclass workspace (ede-java-root-project)
   ((name :initarg :name
          :initform ""
          :custom string
@@ -57,7 +58,7 @@
   (file-name-as-directory (root ws)))
 
 (defmethod workspace-get-absolute-src-roots ((ws workspace))
-  (mapcar 'expand-file-name 
+  (mapcar 'expand-file-name
           (mapcar (lambda (x)
                     (concat (workspace-root ws) x "/"))
                   (src-roots ws))))
@@ -86,20 +87,20 @@
       (message "There are unsaved buffers: %s" (workspace-get-unsaved-buffers (current-workspace)))
     ;; we've essentially decided we're good
     (let* ((buffers (workspace-get-buffers (current-workspace)))
-           (old-files 
-            (mapcar 
+           (old-files
+            (mapcar
              (lambda (path) (substring (buffer-file-name path) (length (workspace-root (current-workspace)))))
              buffers)))
            (set-open-files (current-workspace) old-files)
-           
+
            ;; close all the buffers
            (mapc 'kill-buffer buffers)
 
-           ;; the files we want to open are all the old files, plus the files that were 
+           ;; the files we want to open are all the old files, plus the files that were
            ;; already open in the other workspace
 
            (let* ((new-files (delete-dups (append old-files (open-files ws)))))
-             (mapc 'find-file 
+             (mapc 'find-file
                    (mapcar (lambda (x) (concat (workspace-root ws) x)) new-files)))
 
            ;; after all is done, let's setf the state
@@ -139,13 +140,13 @@
   (should (equal nil (noronha-flatten '())))
   (noronha-flatten (loop for i from 1 to 1000 collect i)))
 
- 
+
 (defun noronha-dir-list-files (dir)
-  (remove-if-not 
+  (remove-if-not
    'identity
    (let ((dirs (noronha-flatten (list dir))))
      (noronha-flatten (mapcar (lambda (dir)
-                                (mapcar (lambda (x) (substring x 2)) 
+                                (mapcar (lambda (x) (substring x 2))
                                         (remove-if '(lambda  (file) (or (string-match "/$" file) (not (string-match ".java$" file))))
                                                    (split-string (shell-command-to-string (concat "cd " dir " && find ."))))))
                               dirs)))))
@@ -157,7 +158,3 @@
     (should (find "One.java" (noronha-dir-list-files (list fixtures "/tmp")) :test 'equal))
     (should (equal nil (noronha-dir-list-files "/doesnotexist")))
     ))
-
-  
-   
-        
