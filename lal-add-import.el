@@ -5,6 +5,43 @@
 (require 'lal-imports)
 (require 'memoize)
 
+(defun workspace-rebuild-index/make-empty ()
+  (interactive)
+  (ede-set 'import-symbol-cache (makehash 'equal)))
+
+(defun workspace-rebuild-index ()
+  (interactive)
+  "Unset all the caches, and do any rebuilding if required of symbol indexes"
+  (workspace-rebuild-index/make-empty)
+  (let ((hash import-symbol-cache))
+    (mapc 'workspace-build-src-index (oref (ede-current-project) :srcroot))
+    (mapc 'workspace-build-jar-index (ede-java-classpath (ede-current-project)))))
+
+(defun workspace-add-index-mapping (classname package)
+  (puthash classname (cons
+                      package
+                      (gethash classname import-symbol-cache))
+           import-symbol-cache))
+
+(defun workspace-get-packages-for-class (classname)
+  (unless (and (boundp 'import-symbol-cache) import-symbol-cache)
+    (workspace-rebuild-index))
+  (gethash classname import-symbol-cache))
+
+(defun workspace-add-mapping-for-fqdn-class (classname)
+  (workspace-add-index-mapping
+   (lal-get-classname-from-import classname)
+   classname))
+
+(defun workspace-build-src-index (root)
+  (mapc 'workspace-add-mapping-for-fqdn-class
+        (noronha-dir-list root)))
+
+(defun workspace-build-jar-index (jar)
+  (mapc 'workspace-add-mapping-for-fqdn-class
+        (noronha-jar-list jar)))
+
+
 ;; sexy code from previous version
 (defmacro noronha-with-if-not-changed-unmark-buffer (&rest body)
   `(let ((old-string (buffer-string))  (old-buffer-modified-p (buffer-modified-p)) )
@@ -58,7 +95,7 @@
   (interactive "sTag: ")
   "Import a 'known' package that has the same classname"
   (let ((tag (lal-trim-tag tag)))
-    (let* ((matches (delete-dups (lal-find-by-classname (upcase-initials tag))))
+    (let* ((matches (workspace-get-packages-for-class tag))
            (match (ido-completing-read "Choose import: " matches nil nil nil 'giit-history)))
       (lal-add-import match))))
 
@@ -154,6 +191,7 @@
                      (split-string (shell-command-to-string (concat "jar -tf " file))))))
 
 (defun noronha-dir-list (dir)
+  "Get a list of all top level classes in the given source directory"
   (message "listing dir %s" dir)
   (mapcar 'noronha-get-canonical-package (noronha-dir-list-files dir)))
 

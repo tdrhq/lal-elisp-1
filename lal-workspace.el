@@ -32,11 +32,6 @@
                :accessor open-files
                :writer set-open-files
                :documentation "internally maintained list/cache of all the files from the workspace that were kept open, it will be restored the next time the file is loaded")
-
-   (import-tag-hash :initform nil
-                    :accessor import-tag-hash
-                    :writer set-import-tag-hash
-                    :documentation "a table of tags to list of filenames that satisify that tag")
    ))
 
 (defmethod workspace-root ((ws workspace))
@@ -137,9 +132,3 @@
     (should (find "One.java" (noronha-dir-list-files (list fixtures "/tmp")) :test 'equal))
     (should (equal nil (noronha-dir-list-files "/doesnotexist")))
     ))
-
-
-(defun workspace-rebuild-index ()
-  (interactive)
-  "Unset all the caches, and do any rebuilding if required of symbol indexes"
-  (oset (ede-current-project) import-tag-hash nil))
