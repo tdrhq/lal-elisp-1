@@ -137,3 +137,9 @@
     (should (find "One.java" (noronha-dir-list-files (list fixtures "/tmp")) :test 'equal))
     (should (equal nil (noronha-dir-list-files "/doesnotexist")))
     ))
+
+
+(defun workspace-rebuild-index ()
+  (interactive)
+  "Unset all the caches, and do any rebuilding if required of symbol indexes"
+  (oset (ede-current-project) import-tag-hash nil))
