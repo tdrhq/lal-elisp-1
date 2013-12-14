@@ -15,7 +15,7 @@
    (let ((ws (workspace "foo"
                         :file (temp-makefile)
                         :root "/tmp/u"
-                        :src-roots '("a/b" "/"))))
+                        :srcroot '("a/b" "/"))))
      (should (equal
               '("/tmp/u/a/b/" "/tmp/u/")
               (workspace-get-absolute-src-roots ws))))))

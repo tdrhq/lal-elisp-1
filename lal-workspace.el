@@ -18,12 +18,6 @@
          :type string
          :accessor root
          :documentation "the root dir of the worksapce")
-   (src-roots :initarg :src-roots
-              :initform '()
-              :accessor src-roots
-              :custom list
-              :type list
-              :documentation "list of all root java directories relative to the root directory")
    (interesting-domains :initarg :interesting-domains
                         :initform '()
                         :custom list
@@ -57,11 +51,11 @@
 (defmethod workspace-root ((ws workspace))
   (file-name-as-directory (root ws)))
 
-(defmethod workspace-get-absolute-src-roots ((ws workspace))
+(defmethod workspace-get-absolute-src-roots ((ws ede-java-root-project))
   (mapcar 'expand-file-name
           (mapcar (lambda (x)
                     (concat (workspace-root ws) x "/"))
-                  (src-roots ws))))
+                  (oref ws :srcroot))))
 
 
 (defun current-workspace ()
