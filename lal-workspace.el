@@ -25,13 +25,6 @@
                         :accessor interesting-domains
                         :documentation  "each of this domains is stored into one separate section when ordering imports, in effect it's a style declaration")
 
-   (extern-jars :initarg :extern-jars
-                :initform '()
-                :custom list
-                :type list
-                :accessor extern-jars
-                :writer set-extern-jars
-                :documentation "list of jars that are used externally")
    (open-files :initarg :open-files
                :initform '()
                :custom list
@@ -46,8 +39,6 @@
                     :documentation "a table of tags to list of filenames that satisify that tag")
    ))
 
-(setf *current-workspace* nil)
-
 (defmethod workspace-root ((ws workspace))
   (file-name-as-directory (root ws)))
 
@@ -59,11 +50,8 @@
 
 
 (defun current-workspace ()
-  *current-workspace*)
-
-(defmethod add-extern-jar  ((ws workspace) jar)
-  "Convenience method to manipulate the extern-jars field"
-  (set-extern-jars ws (cons jar (extern-jars ws))))
+  "Deprecated wrapper over ede-current-project"
+  (ede-current-project))
 
 (defmethod workspace-get-buffers ((ws workspace))
   "Get all open buffers that we think belongs to the workspace"
@@ -96,9 +84,6 @@
            (let* ((new-files (delete-dups (append old-files (open-files ws)))))
              (mapc 'find-file
                    (mapcar (lambda (x) (concat (workspace-root ws) x)) new-files)))
-
-           ;; after all is done, let's setf the state
-           (setf *current-workspace* ws)
            )))
 
 (defmethod workspace-is-file-managed ((ws workspace) file)

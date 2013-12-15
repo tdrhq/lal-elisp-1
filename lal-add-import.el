@@ -76,9 +76,9 @@
 
 (defun lal-load-jars ()
   (if (current-workspace)
-      (extern-jars (current-workspace))
+      (ede-java-classpath (ede-current-project))
     (*lal-load-jars*)))
-  
+
 
 
 
@@ -95,7 +95,7 @@
   (remove-if-not 'identity
                  (append
                   (let* ((src-roots (workspace-get-absolute-src-roots (current-workspace))))
-                    (mapcar 
+                    (mapcar
                      (lambda (x) (mapcar (lambda (y) (concat x "/" y)) (lal-find-file-for-classname-in-dir classname x)))
                      src-roots)))))
 
@@ -111,7 +111,7 @@
 (defun lal-src-to-import-hash (workspace)
   (or
    (import-tag-hash workspace)
-   (set-import-tag-hash workspace 
+   (set-import-tag-hash workspace
                         (let ((hash (makehash 'equal)))
                           ;; get the list of all files
                           (mapc
@@ -123,17 +123,17 @@
                            (let ((src-roots (workspace-get-absolute-src-roots workspace)))
                              (apply 'append (mapcar 'noronha-dir-list src-roots))))
                           hash))))
-   
+
 
 (defun lal-src-find-for-classname (classname)
   (gethash classname (or (lal-src-to-import-hash (current-workspace)) '())))
 
 
-  
+
 
 ;; find by classname
 (defun lal-find-by-classname (classname)
-  (append 
+  (append
    (lal-filter-imports-for-classname classname lal-safe-packages)
    (lal-src-find-for-classname  classname)
    (lal-jars-find-for-classname  (lal-load-jars) classname)))
@@ -170,4 +170,3 @@
 (defun lal-jars-find-for-classname (jar-list classname)
   (lal-filter-imports-for-classname classname
                                     (noronha-jars-list jar-list)))
-

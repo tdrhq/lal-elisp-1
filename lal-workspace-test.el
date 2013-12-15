@@ -21,14 +21,6 @@
               (workspace-get-absolute-src-roots ws))))))
 
 
-(ert-deftest lal-workspace-add-exter-jar-test ()
-  (let ((ws (workspace "foo"
-                       :file (temp-makefile)
-                       :root "/tmp/u")))
-    (add-extern-jar ws "/tmp/a.jar")
-    (should (equal '("/tmp/a.jar") (extern-jars ws)))))
-
-
 (ert-deftest lal-workspace-root ()
   (let* (
          (makefile (make-temp-file "foo"))
