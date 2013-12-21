@@ -14,7 +14,7 @@
   "Unset all the caches, and do any rebuilding if required of symbol indexes"
   (workspace-rebuild-index/make-empty)
   (let ((hash import-symbol-cache))
-    (mapc 'workspace-build-src-index (oref (ede-current-project) :srcroot))
+    (mapc 'workspace-build-src-index (workspace-get-absolute-src-roots (ede-current-project)))
     (mapc 'workspace-build-jar-index (ede-java-classpath (ede-current-project)))))
 
 (defun workspace-add-index-mapping (classname package)
