@@ -23,15 +23,15 @@
   (with-temp-buffer
     (insert "package foo.bar;\n\n")
     (should (equal "foo.bar" (lal-get-package)))))
-                                
-  
+
+
 (defun lal-goto-first-import ()
   "goto the first line where we expect an import to be if there's no
   import go to the line after the package directive"
     (beginning-of-buffer)
     (re-search-forward "^package" nil t)
-    (while (and 
-            (not (import-on-line)) 
+    (while (and
+            (not (import-on-line))
             (not (eq (point-max) (point))))
       (forward-line))
     (when (eq (point-max) (point))
@@ -42,7 +42,7 @@
 
 (defmacro lal-run-for-lines (&rest f)
   "run a command for each line in the buffer and collect the return values"
-  `(let ((lal-return-val ())) 
+  `(let ((lal-return-val ()))
      (lal-run-for-lines-c
       (push (progn ,@f) lal-return-val))
      lal-return-val))
@@ -74,7 +74,7 @@
 (defun go-to-last-import ()
   (interactive)
   (while (re-search-forward "^import .*" nil t)))
-    
+
 (defun delete-all-imports ()
   "delete all imports from the file"
   (interactive)
@@ -87,7 +87,7 @@
       (go-to-last-import)
       (delete-region start (point)) )))
 
-(setq *lal:interesting-domains* 
+(setq *lal:interesting-domains*
       '("javax" "java" ""))
 
 (defun lal-interesting-domains ()
@@ -99,7 +99,7 @@
   "Given a domain, tell me which numbered section it should be in"
   (number-to-string
    (+ 100
-      (position t 
+      (position t
                 (mapcar (lambda (domain) (starts-with import domain)) (lal-interesting-domains) )))))
 
 (defun add-a-numeric-prefix-for-domain (d)
@@ -126,10 +126,10 @@
 (defun add-newlines-between-sections ()
   (interactive)
   "add a newline between each section of *lal:interesting-domains*"
-  (save-excursion 
+  (save-excursion
     (lal-goto-first-import)
     (add-newlines-process-line)))
-  
+
 (defun lal-import-lessp (imp1 imp2)
   (string-lessp
    (add-a-numeric-prefix-for-domain imp1)
@@ -142,22 +142,22 @@
       (progn
         (delete-char 1)
         (lal-remove-multiple-empty-lines))))
-   
 
 
-  
+
+
 (defun lal-reorder-imports ()
   (interactive)
   (save-excursion
     (lal-goto-first-import)
     (let ((old-imports (delete-dups (remove-if-not 'import-used-p (imports-in-buffer)))))
-      (delete-all-imports) 
+      (delete-all-imports)
       (mapc (lambda (val) (insert-string (concat "import " val "\n")))
             (sort old-imports 'lal-import-lessp))
 
       (add-newlines-between-sections)
       (lal-remove-multiple-empty-lines)
-      
+
       ;; if there's no newline before the first import, add it
       (lal-goto-first-import)
       (forward-line -1)
@@ -220,7 +220,8 @@
 (defun lal-add-import (import)
   "add an import to the current file"
   (interactive "sPackage or import: ")
-  (save-excursion
-    (lal-goto-first-import)
-    (insert (concat "import " import ";\n")))
-  (lal-reorder-imports))
+  (unless (and import (equal "" import))
+    (save-excursion
+      (lal-goto-first-import)
+      (insert (concat "import " import ";\n")))
+    (lal-reorder-imports)))
