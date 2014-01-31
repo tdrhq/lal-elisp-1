@@ -54,7 +54,7 @@
   (save-excursion
     (beginning-of-line)
     (when (equal (thing-at-point 'word) "import")
-      (when (re-search-forward "import \\(.*\\)" nil t)
+      (when (re-search-forward "import \\(.*\\);" nil t)
         (match-string 1)))))
 
 (defun imports-in-buffer ()
@@ -152,7 +152,7 @@
     (lal-goto-first-import)
     (let ((old-imports (delete-dups (remove-if-not 'import-used-p (imports-in-buffer)))))
       (delete-all-imports)
-      (mapc (lambda (val) (insert-string (concat "import " val "\n")))
+      (mapc (lambda (val) (insert-string (concat "import " val ";\n")))
             (sort old-imports 'lal-import-lessp))
 
       (add-newlines-between-sections)
