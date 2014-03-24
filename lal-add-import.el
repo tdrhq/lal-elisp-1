@@ -115,10 +115,26 @@
                      (lambda (x) (mapcar (lambda (y) (concat x "/" y)) (lal-find-file-for-classname-in-dir classname x)))
                      src-roots)))))
 
+(defun lal-canonicalize-classname (classname)
+  (let ((case-fold-search nil))
+    (if (string-match "^m[A-Z]" classname)
+        (lal-canonicalize-classname (substring classname 1))
+      (if (string-match "[a-z]" classname)
+          ;; capitalize the first letter
+          (let ((cn (string-to-list classname)))
+            (concat (cons (capitalize (first cn)) (rest cn)) ))))))
+
+(ert-deftest lal-canonicalize-classname ()
+  (should (equal "ArnoldNor" (lal-canonicalize-classname "ArnoldNor")))
+  (should (equal "ArnoldNor" (lal-canonicalize-classname "mArnoldNor")))
+  (should (equal "ArnoldNor" (lal-canonicalize-classname "arnoldNor"))))
+
+
+
 (setq lal-find-file-history ())
 (defun lal-find-file-for-classname-interactive (classname)
-  (interactive (list (read-string (format "Classname (%s): " (thing-at-point 'word))
-                             nil nil (thing-at-point 'word))))
+  (interactive (list (read-string (format "Classname (%s): " (lal-canonicalize-classname (thing-at-point 'word)))
+                             nil nil (lal-canonicalize-classname (thing-at-point 'word)))))
   (find-file (ido-completing-read "Choose file: " (lal-find-file-for-classname classname) nil nil nil 'lal-find-file-history)))
 
 (global-set-key "\C-cg" 'lal-find-file-for-classname-interactive)
