@@ -54,11 +54,13 @@
 
 
 ;; same as above, but instead of packages, actual file names
-(defun lal-filter-file-names-for-classname (classname file-list)
-  (remove-if-not '(lambda (file-name)
-                     (equal (file-name-nondirectory file-name)
-                            (concat classname ".java")))
-                 file-list))
+(defun lal-filter-file-names-for-classname (classname-regex file-list)
+  (remove-if-not
+   '(lambda (file-name)
+      (string-match
+       classname-regex
+       (file-name-sans-extension (file-name-nondirectory file-name))))
+   file-list))
 
 (ert-deftest lal-filter-file-names-for-classname ()
   (let ((files (list "a/b/C.java" "a/C.java" "a/B.java")))
@@ -98,44 +100,69 @@
 
 
 
-(defun lal-find-file-for-classname-in-dir (classname dir)
+(defun lal-find-file-for-classname-in-dir (classname-regex dir)
   (let ((dir-listing (noronha-dir-list-files dir)))
-    (lal-filter-file-names-for-classname classname dir-listing)))
+    (lal-filter-file-names-for-classname classname-regex dir-listing)))
 
 (ert-deftest lal-find-file-for-classname-in-dir ()
   (let ((fixtures (concat (lal-project-dir) "/fixtures")))
-    (should (equal (list "One.java") (lal-find-file-for-classname-in-dir "One" fixtures)))
-    (should (equal '() (lal-find-file-for-classname-in-dir "DoesNotExist" fixtures)))))
+    (should (equal (list "One.java") (lal-find-file-for-classname-in-dir "^One$" fixtures)))
+    (should (equal '() (lal-find-file-for-classname-in-dir "^DoesNotExist$" fixtures)))))
 
 (defun lal-find-file-for-classname (classname)
-  (remove-if-not 'identity
-                 (append
-                  (let* ((src-roots (workspace-get-absolute-src-roots (current-workspace))))
-                    (mapcar
-                     (lambda (x) (mapcar (lambda (y) (concat x "/" y)) (lal-find-file-for-classname-in-dir classname x)))
-                     src-roots)))))
+  (lal-find-file-for-classname-regex (concat "^" classname "$")))
+
+(defun lal-find-file-for-classname-regex (classname-regex)
+  (noronha-flatten
+   (remove-if-not 'identity
+                  (append
+                   (let* ((src-roots (workspace-get-absolute-src-roots (current-workspace))))
+                     (mapcar
+                      (lambda (x) (mapcar (lambda (y) (concat x "/" y)) (lal-find-file-for-classname-in-dir classname-regex x)))
+                     src-roots))))))
 
 (defun lal-canonicalize-classname (classname)
-  (let ((case-fold-search nil))
-    (if (string-match "^m[A-Z]" classname)
-        (lal-canonicalize-classname (substring classname 1))
-      (if (string-match "[a-z]" classname)
-          ;; capitalize the first letter
-          (let ((cn (string-to-list classname)))
-            (concat (cons (capitalize (first cn)) (rest cn)) ))))))
+  (if classname
+      (let ((case-fold-search nil))
+        (if (string-match "^m[A-Z]" classname)
+            (lal-canonicalize-classname (substring classname 1))
+          (if (string-match "[a-z]" classname)
+              ;; capitalize the first letter
+              (let ((cn (string-to-list classname)))
+                (concat (cons (capitalize (first cn)) (rest cn)) )))))))
 
 (ert-deftest lal-canonicalize-classname ()
+  (should (equal nil (lal-canonicalize-classname nil)))
   (should (equal "ArnoldNor" (lal-canonicalize-classname "ArnoldNor")))
   (should (equal "ArnoldNor" (lal-canonicalize-classname "mArnoldNor")))
   (should (equal "ArnoldNor" (lal-canonicalize-classname "arnoldNor"))))
 
 
+(defun lal-classnames-for-classname-regex (regex)
+  (let ((files (lal-find-file-for-classname-regex regex)))
+    (message "files: %s" files)
+    (mapcar
+     '(lambda (filename) (file-name-sans-extension (file-name-nondirectory filename)))
+     files)))
+
+(setq  lal-read-classname-history ())
+(defun lal-read-classname ()
+  "Read a classname interactively and return it"
+  (let ((current-classname (lal-canonicalize-classname (thing-at-point 'word)))
+        (all-classes (lal-classnames-for-classname-regex ".*")))
+    (ido-completing-read
+     "Classname: " ;; prompt
+     all-classes   ;; choices
+     nil           ;; predicate
+     nil           ;; require match
+     current-classname ;; initial-input
+     lal-read-classname-history)))
+
 
 (setq lal-find-file-history ())
 (defun lal-find-file-for-classname-interactive (classname)
-  (interactive (list (read-string (format "Classname (%s): " (lal-canonicalize-classname (thing-at-point 'word)))
-                             nil nil (lal-canonicalize-classname (thing-at-point 'word)))))
-  (find-file (ido-completing-read "Choose file: " (lal-find-file-for-classname classname) nil nil nil 'lal-find-file-history)))
+  (interactive (list (lal-read-classname))
+  (find-file (ido-completing-read "Choose file: " (lal-find-file-for-classname classname) nil nil nil 'lal-find-file-history))))
 
 (global-set-key "\C-cg" 'lal-find-file-for-classname-interactive)
 
@@ -203,3 +230,14 @@
 (defun lal-jars-find-for-classname (jar-list classname)
   (lal-filter-imports-for-classname classname
                                     (noronha-jars-list jar-list)))
+
+(defun lal-expected-package-name-from-buffername ()
+  (let ((fn (buffer-file-name))
+        (final nil)
+        (srcroots (workspace-get-absolute-src-roots (current-workspace))))
+
+    (mapc (lambda (sroot)
+            (if (starts-with fn sroot)
+                (setq final (file-relative-name fn sroot)))) srcroots)
+
+    (replace-regexp-in-string "\\.[a-zA-Z0-9]*\\.java" "" (replace-regexp-in-string "[/]" "." final))))

@@ -34,8 +34,16 @@
                :documentation "internally maintained list/cache of all the files from the workspace that were kept open, it will be restored the next time the file is loaded")
    ))
 
+
 (defmethod workspace-root ((ws workspace))
   (file-name-as-directory (root ws)))
+
+(defmethod workspace-add-srcroot ((ws workspace) src)
+  (oset ws :srcroot (cons src (oref ws :srcroot))))
+
+(defmethod workspace-add-jar ((ws workspace) src)
+  (oset ws :localclasspath (cons src (oref ws :localclasspath))))
+
 
 (defmethod workspace-get-absolute-src-roots ((ws ede-java-root-project))
   (mapcar 'expand-file-name
