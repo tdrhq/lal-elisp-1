@@ -140,7 +140,6 @@
 
 (defun lal-classnames-for-classname-regex (regex)
   (let ((files (lal-find-file-for-classname-regex regex)))
-    (message "files: %s" files)
     (mapcar
      '(lambda (filename) (file-name-sans-extension (file-name-nondirectory filename)))
      files)))
@@ -161,8 +160,8 @@
 
 (setq lal-find-file-history ())
 (defun lal-find-file-for-classname-interactive (classname)
-  (interactive (list (lal-read-classname))
-  (find-file (ido-completing-read "Choose file: " (lal-find-file-for-classname classname) nil nil nil 'lal-find-file-history))))
+  (interactive (list (lal-read-classname)))
+  (find-file (ido-completing-read "Choose file: " (lal-find-file-for-classname classname) nil nil nil 'lal-find-file-history)))
 
 (global-set-key "\C-cg" 'lal-find-file-for-classname-interactive)
 
