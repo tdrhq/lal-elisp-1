@@ -147,20 +147,23 @@
 (setq  lal-read-classname-history ())
 (defun lal-read-classname ()
   "Read a classname interactively and return it"
-  (ede-apply-project-local-variables)
-  (let ((current-classname (lal-canonicalize-classname (thing-at-point 'word)))
-        (all-classes
-         (or
-          lal-read-classname-cache
+  (if t
+      (read-string "Classname: (%s)" (lal-canonicalize-classname (thing-at-point 'word)))
+    (ede-apply-project-local-variables)
+    (let ((current-classname (lal-canonicalize-classname (thing-at-point 'word)))
+          (all-classes
+           (or
+          (looking-at )l-read-classname-cache
           (lal-classnames-for-classname-regex ".*"))))
     (ede-make-project-local-variable lal-read-classname-cache)
+    (ede-set-project-local-variable lal-read-classname-cache all-classes)
     (ido-completing-read
      "Classname: " ;; prompt
      all-classes   ;; choices
      nil           ;; predicate
      nil           ;; require match
      current-classname ;; initial-input
-     lal-read-classname-history)))
+     lal-read-classname-history))))
 
 
 (setq lal-find-file-history ())
