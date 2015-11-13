@@ -14,11 +14,6 @@
    ;;       :custom string
    ;;       :type string
    ;;       :documentation "the name of the workspace")
-   (root :reader workspace-root
-         :writer workspace-set-root
-         :accessor root
-         :custom string
-         :type string)
    (srcroot :initarg :srcroot
             :initform '())
    (localclasspath :initarg :localclasspath
