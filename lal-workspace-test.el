@@ -31,7 +31,7 @@
 
 (ert-deftest lal-can-access-root ()
   (let  ((ws (workspace nil :directory "/tmp/u")))
-    (should (equal "/tmp/u/" (oref ws :root)))))
+    (should (equal "/tmp/u/" (ede-project-root ws)))))
 
 
 
