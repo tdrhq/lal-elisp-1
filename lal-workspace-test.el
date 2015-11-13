@@ -29,6 +29,10 @@
                        :directory "/tmp/u")))
     (should (equal "/tmp/u/" (workspace-root ws)))))
 
+(ert-deftest lal-can-access-root ()
+  (let  ((ws (workspace nil :directory "/tmp/u")))
+    (should (equal ("/tmp/u/" (oref ws :root))))))
+
 
 
 (ert-deftest lal-interesting-domains-test ()
