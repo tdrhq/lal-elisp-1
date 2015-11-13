@@ -33,7 +33,9 @@
   (let  ((ws (workspace nil :directory "/tmp/u")))
     (should (equal "/tmp/u/" (ede-project-root ws)))))
 
-
+(ert-deftest lal-can-access-as-slot ()
+  (let  ((ws (workspace nil :directory "/tmp/u")))
+    (should (equal "/tmp/u/" (oref ws :root)))))
 
 (ert-deftest lal-interesting-domains-test ()
   (let ((ws (workspace "foo" :interesting-domains '("java"))))
