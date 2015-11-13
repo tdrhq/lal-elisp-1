@@ -16,6 +16,7 @@
    ;;       :documentation "the name of the workspace")
    (root :reader workspace-root
          :writer workspace-set-root
+         :accessor root
          :type string)
    (srcroot :initarg :srcroot
             :initform '())
