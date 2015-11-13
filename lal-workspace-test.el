@@ -33,6 +33,11 @@
   (let  ((ws (workspace nil :directory "/tmp/u")))
     (should (equal "/tmp/u/" (ede-project-root ws)))))
 
+(ert-deftest lal-can-locate-project ()
+  (with-temp-project
+   (let ((ws (workspace "foo" :directory temp-project-dir)))
+     (should (equal ws ws)))))
+
 (ert-deftest lal-interesting-domains-test ()
   (let ((ws (workspace "foo" :interesting-domains '("java"))))
     (should (equal '("java") (interesting-domains ws)))))
