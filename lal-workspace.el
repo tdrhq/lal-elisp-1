@@ -17,6 +17,7 @@
    (root :reader workspace-root
          :writer workspace-set-root
          :accessor root
+         :custom string
          :type string)
    (srcroot :initarg :srcroot
             :initform '())
