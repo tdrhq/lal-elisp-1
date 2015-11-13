@@ -14,7 +14,7 @@
   (with-temp-project
    (let ((ws (workspace
               ;; :file (temp-makefile)
-                        :root "/tmp/u"
+                        :directory "/tmp/u"
                         :srcroot '("a/b" "/"))))
      (should (equal
               '("/tmp/u/a/b/" "/tmp/u/")
@@ -26,7 +26,7 @@
          (makefile (make-temp-file "foo"))
          (ws (workspace "foo"
                         ;; :file makefile
-                       :root "/tmp/u")))
+                       :directory "/tmp/u")))
     (should (equal "/tmp/u/" (workspace-root ws)))))
 
 

@@ -7,19 +7,16 @@
 (require 'ede/config)
 ;; (require 'ede/java-root)
 
-(defclass workspace (ede-project-with-config-java)
+(defclass workspace (ede-project ede-project-with-config-java)
   (
    ;; (name :initarg :name
    ;;       :initform ""
    ;;       :custom string
    ;;       :type string
    ;;       :documentation "the name of the workspace")
-   (root :initarg :root
-         :initform ""
-         :custom string
-         :type string
-         :accessor root
-         :documentation "the root dir of the worksapce")
+   (root :reader workspace-root
+         :writer workspace-set-root
+         :type string)
    (srcroot :initarg :srcroot
             :initform '())
    (localclasspath :initarg :localclasspath
@@ -43,9 +40,11 @@
                :documentation "internally maintained list/cache of all the files from the workspace that were kept open, it will be restored the next time the file is loaded")
    ))
 
-
 (defmethod workspace-root ((ws workspace))
-  (file-name-as-directory (root ws)))
+  (file-name-as-directory (oref ws :directory)))
+
+(defmethod workspace-set-root ((ws workspace) root)
+  (oset ws :directory root))
 
 (defmethod workspace-add-srcroot ((ws workspace) src)
   (oset ws :srcroot (cons src (oref ws :srcroot))))
