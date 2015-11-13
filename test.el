@@ -1,11 +1,11 @@
-#!/usr/bin/emacs --script
+#!/usr/local/bin/emacs --script
 ;; Load CEDET.
 ;; See cedet/common/cedet.info for configuration details.
 ;; IMPORTANT: Tou must place this *before* any CEDET component (including
 ;; EIEIO) gets activated by another package (Gnus, auth-source, ...).
-(load-file "/home/arnold/builds/cedet/cedet-devel-load.el")
+;;(load-file "/home/arnold/builds/cedet/cedet-devel-load.el")
 
-(global-ede-mode 1)
+;;(global-ede-mode 1)
 ;; runs all the tests in the project
 
 (setq mydir (file-name-directory load-file-name))

@@ -1,3 +1,4 @@
+
 ;; creates mechanisms for creating temporary directories for the
 ;; purpose of a test
 
@@ -23,7 +24,7 @@
   `(let ((temp-project-dir (lal-create-temp-project)))
      (unwind-protect (progn ,@body)
        (lal-delete-temp-project temp-project-dir))))
-  
+
 
 ;; touch a filename
 (defun lal-touch (dir file)
@@ -33,8 +34,3 @@
     (make-directory (file-name-directory abs) t)
     (write-region "" nil abs)
     abs))
-
-
-
-
-    

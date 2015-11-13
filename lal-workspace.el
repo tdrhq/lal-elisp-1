@@ -4,20 +4,29 @@
 
 (require 'eieio)
 (require 'lal-workspace-list)
-(require 'ede/java-root)
+(require 'ede/config)
+;; (require 'ede/java-root)
 
-(defclass workspace (ede-java-root-project)
-  ((name :initarg :name
-         :initform ""
-         :custom string
-         :type string
-         :documentation "the name of the workspace")
+(defclass workspace (ede-project-with-config-java)
+  (
+   ;; (name :initarg :name
+   ;;       :initform ""
+   ;;       :custom string
+   ;;       :type string
+   ;;       :documentation "the name of the workspace")
    (root :initarg :root
          :initform ""
          :custom string
          :type string
          :accessor root
          :documentation "the root dir of the worksapce")
+   (srcroot :initarg :srcroot
+            :initform '())
+   (localclasspath :initarg :localclasspath
+                   :initform '())
+   (classpath :initarg :classpath
+              :accessor classpath
+              :initform '())
    (interesting-domains :initarg :interesting-domains
                         :initform '()
                         :custom list
@@ -45,7 +54,7 @@
   (oset ws :localclasspath (cons src (oref ws :localclasspath))))
 
 
-(defmethod workspace-get-absolute-src-roots ((ws ede-java-root-project))
+(defmethod workspace-get-absolute-src-roots ((ws workspace))
   (mapcar 'expand-file-name
           (mapcar (lambda (x)
                     (concat (workspace-root ws) x "/"))

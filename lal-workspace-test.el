@@ -7,13 +7,13 @@
 
 (ert-deftest lal-workspace-simple-creation ()
   (workspace "foo"
-             :file (temp-makefile)
-             :name "soo"))
+             ;;             :file (temp-makefile)
+             ))
 
 (ert-deftest lal-workspace-absolute-src-roots-test ()
   (with-temp-project
-   (let ((ws (workspace "foo"
-                        :file (temp-makefile)
+   (let ((ws (workspace
+              ;; :file (temp-makefile)
                         :root "/tmp/u"
                         :srcroot '("a/b" "/"))))
      (should (equal
@@ -25,12 +25,12 @@
   (let* (
          (makefile (make-temp-file "foo"))
          (ws (workspace "foo"
-                       :file makefile
+                        ;; :file makefile
                        :root "/tmp/u")))
     (should (equal "/tmp/u/" (workspace-root ws)))))
 
 
 
 (ert-deftest lal-interesting-domains-test ()
-  (let ((ws (workspace "foo" :file (temp-makefile) :interesting-domains '("java"))))
+  (let ((ws (workspace "foo" :interesting-domains '("java"))))
     (should (equal '("java") (interesting-domains ws)))))
