@@ -33,4 +33,4 @@
 
 
 (message "Going to run tests")
-(ert-run-tests-batch)
+(ert-run-tests-batch-and-exit)
