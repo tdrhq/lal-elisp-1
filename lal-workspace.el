@@ -43,6 +43,9 @@
 (defmethod workspace-root ((ws workspace))
   (file-name-as-directory (oref ws :directory)))
 
+(defmethod ede-project-root ((ws workspace))
+  (workspace-root ws))
+
 (defmethod workspace-set-root ((ws workspace) root)
   (oset ws :directory root))
 
