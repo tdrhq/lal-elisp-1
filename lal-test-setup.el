@@ -3,6 +3,7 @@
 ;; purpose of a test
 
 (provide 'lal-test-setup)
+(global-ede-mode 1)
 
 (defun lal-project-dir ()
   "Get the project dir to use for this"

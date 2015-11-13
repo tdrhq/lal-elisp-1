@@ -34,9 +34,13 @@
     (should (equal "/tmp/u/" (ede-project-root ws)))))
 
 (ert-deftest lal-can-locate-project ()
-  (with-temp-project
-   (let ((ws (workspace "foo" :directory temp-project-dir)))
-     (should (equal ws ws)))))
+  (let ((temp-project-dir (file-name-as-directory (expand-file-name "./fixtures"))))
+    (message temp-project-dir)
+    (let ((ws (workspace "foo" :directory temp-project-dir)) actual)
+      (ede-add-project-to-global-list ws)
+      (setq actual (ede-directory-get-open-project temp-project-dir))
+      (should (not (equal nil (ede--inode-for-dir (concat temp-project-dir "ImportInPackage.java")))))
+      (should (equal ws actual)))))
 
 (ert-deftest lal-interesting-domains-test ()
   (let ((ws (workspace "foo" :interesting-domains '("java"))))
