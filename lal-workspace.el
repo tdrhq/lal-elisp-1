@@ -40,6 +40,11 @@
 (defmethod workspace-root ((ws workspace))
   (file-name-as-directory (oref ws :directory)))
 
+(cl-defmethod ede-find-subproject-for-directory ((proj workspace)
+                                                 dir)
+  "Return PROJ, for handling all subdirs below DIR."
+  proj)
+
 (defmethod ede-project-root ((ws workspace))
   (workspace-root ws))
 
