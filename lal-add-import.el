@@ -9,8 +9,18 @@
   (interactive)
   (workspace-set (ede-current-project) 'import-symbol-cache (makehash 'equal)))
 
+(make-variable-buffer-local 'workspace-import-symbol-cache-cache)
+
 (defun workspace-import-symbol-cache ()
-  (workspace-get (ede-current-project) 'import-symbol-cache))
+  (if workspace-import-symbol-cache-cache
+      workspace-import-symbol-cache-cache
+    (setq workspace-import-symbol-cache-cache (workspace-get (ede-current-project) 'import-symbol-cache))
+    workspace-import-symbol-cache-cache))
+
+(defun workspace-dir-concat (a b)
+  (if (starts-with b "/")
+      b
+    (concat a "/" b)))xo
 
 (defun workspace-rebuild-index ()
   (interactive)
@@ -21,7 +31,7 @@
     (message "Going to build jar index")
     (let ((project-root (ede-project-root-directory (ede-current-project))))
       (mapc 'workspace-build-jar-index
-            (mapcar '(lambda (x) (concat project-root "/" x))
+            (mapcar '(lambda (x) (workspace-dir-concat project-root x))
                   (ede-java-classpath (ede-current-project)))))))
 
 (defun workspace-add-index-mapping (classname package)
@@ -33,7 +43,7 @@
 (defun workspace-get-packages-for-class (classname)
   (unless (workspace-import-symbol-cache)
     (workspace-rebuild-index))
-  (workspace-import-symbol-cache))
+  (gethash classname (workspace-import-symbol-cache)))
 
 (defun workspace-add-mapping-for-fqdn-class (classname)
   (workspace-add-index-mapping
@@ -226,6 +236,8 @@
 
 (defun noronha-jar-list (file)
   (message "listing jar %s" file)
+  (unless (file-exists-p file)
+    (error "File %s does not exist" file))
   (mapcar 'noronha-get-canonical-package
           (remove-if '(lambda  (file) (string-match "/$" file))
                      (mret (split-string (shell-command-to-string (concat "jar -tf " file)))))))

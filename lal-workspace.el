@@ -72,7 +72,7 @@
   (oset ws :localclasspath (cons src (oref ws :localclasspath))))
 
 (defmethod workspace-remove-jar ((ws workspace) src)
-  (oset ws :localclasspath (cons src (oref ws :localclasspath))))
+  (delete src (oref ws :localclasspath)))
 
 (defmethod workspace-get-absolute-src-roots ((ws workspace))
   (mapcar 'expand-file-name
