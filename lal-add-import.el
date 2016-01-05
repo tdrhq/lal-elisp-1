@@ -7,6 +7,7 @@
 
 (defun workspace-rebuild-index/make-empty ()
   (interactive)
+  (ede-make-project-local-variable 'import-symbol-cache)
   (ede-set 'import-symbol-cache (makehash 'equal)))
 
 (defun workspace-rebuild-index ()
@@ -15,7 +16,11 @@
   (workspace-rebuild-index/make-empty)
   (let ((hash import-symbol-cache))
     (mapc 'workspace-build-src-index (workspace-get-absolute-src-roots (ede-current-project)))
-    (mapc 'workspace-build-jar-index (ede-java-classpath (ede-current-project)))))
+    (message "Going to build jar index")
+    (let ((project-root (ede-project-root-directory (ede-current-project))))
+      (mapc 'workspace-build-jar-index
+            (mapcar '(lambda (x) (concat project-root "/" x))
+                  (ede-java-classpath (ede-current-project)))))))
 
 (defun workspace-add-index-mapping (classname package)
   (puthash classname (cons
@@ -213,11 +218,15 @@
    "/" "."
    (replace-regexp-in-string "\\.class$\\|\\.java$\\|/$" "" package)))
 
+(defun mret (a)
+  (message "got %s" a)
+  a)
+
 (defun noronha-jar-list (file)
   (message "listing jar %s" file)
   (mapcar 'noronha-get-canonical-package
           (remove-if '(lambda  (file) (string-match "/$" file))
-                     (split-string (shell-command-to-string (concat "jar -tf " file))))))
+                     (mret (split-string (shell-command-to-string (concat "jar -tf " file)))))))
 
 (defun noronha-dir-list (dir)
   "Get a list of all top level classes in the given source directory"

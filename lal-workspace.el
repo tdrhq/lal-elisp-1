@@ -45,6 +45,12 @@
   "Return PROJ, for handling all subdirs below DIR."
   proj)
 
+(cl-defmethod ede-project-root ((this workspace))
+  this)
+
+(cl-defmethod ede-project-root-directory ((this workspace))
+  (oref this directory))
+
 (defmethod ede-project-root ((ws workspace))
   (workspace-root ws))
 
@@ -74,6 +80,9 @@
   (remove-if-not
    '(lambda (a) (starts-with (buffer-file-name a) (workspace-root ws)))
    (buffer-list)))
+
+(defmethod ede-java-classpath ((ws workspace))
+  (oref ws :localclasspath))
 
 (defmethod workspace-get-unsaved-buffers ((ws workspace))
    (remove-if-not 'buffer-modified-p (workspace-get-buffers ws)))
