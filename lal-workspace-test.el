@@ -20,6 +20,12 @@
               '("/tmp/u/a/b/" "/tmp/u/")
               (workspace-get-absolute-src-roots ws))))))
 
+(ert-deftest lal-workspace-set-get-var ()
+  (with-temp-project
+   (let ((ws (workspace)))
+     (workspace-set ws 'foo "bar")
+     (should (equal "bar" (workspace-get ws 'foo))))))
+
 
 (ert-deftest lal-workspace-root ()
   (let* (

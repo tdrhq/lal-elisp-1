@@ -7,14 +7,16 @@
 
 (defun workspace-rebuild-index/make-empty ()
   (interactive)
-  (ede-make-project-local-variable 'import-symbol-cache)
-  (ede-set 'import-symbol-cache (makehash 'equal)))
+  (workspace-set (ede-current-project) 'import-symbol-cache (makehash 'equal)))
+
+(defun workspace-import-symbol-cache ()
+  (workspace-get (ede-current-project) 'import-symbol-cache))
 
 (defun workspace-rebuild-index ()
   (interactive)
   "Unset all the caches, and do any rebuilding if required of symbol indexes"
   (workspace-rebuild-index/make-empty)
-  (let ((hash import-symbol-cache))
+  (let ((hash (workspace-import-symbol-cache)))
     (mapc 'workspace-build-src-index (workspace-get-absolute-src-roots (ede-current-project)))
     (message "Going to build jar index")
     (let ((project-root (ede-project-root-directory (ede-current-project))))
@@ -25,13 +27,13 @@
 (defun workspace-add-index-mapping (classname package)
   (puthash classname (cons
                       package
-                      (gethash classname import-symbol-cache))
-           import-symbol-cache))
+                      (gethash classname (workspace-import-symbol-cache)))
+           (workspace-import-symbol-cache)))
 
 (defun workspace-get-packages-for-class (classname)
-  (unless (and (boundp 'import-symbol-cache) import-symbol-cache)
+  (unless (workspace-import-symbol-cache)
     (workspace-rebuild-index))
-  (gethash classname import-symbol-cache))
+  (workspace-import-symbol-cache))
 
 (defun workspace-add-mapping-for-fqdn-class (classname)
   (workspace-add-index-mapping

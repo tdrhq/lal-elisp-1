@@ -35,7 +35,18 @@
                :accessor open-files
                :writer set-open-files
                :documentation "internally maintained list/cache of all the files from the workspace that were kept open, it will be restored the next time the file is loaded")
+   (cache-map :initarg :cache-map
+              :accessor cache-map
+              :initform (make-hash-table))
    ))
+
+(defmethod workspace-set ((ws workspace) key value)
+  (let ((map (oref ws :cache-map)))
+    (puthash key value map)))
+
+(defmethod workspace-get ((ws workspace) key)
+  (let ((map (oref ws :cache-map)))
+    (gethash key map)))
 
 (defmethod workspace-root ((ws workspace))
   (file-name-as-directory (oref ws :directory)))
@@ -50,9 +61,6 @@
 
 (cl-defmethod ede-project-root-directory ((this workspace))
   (oref this directory))
-
-(defmethod ede-project-root ((ws workspace))
-  (workspace-root ws))
 
 (defmethod workspace-set-root ((ws workspace) root)
   (oset ws :directory root))
