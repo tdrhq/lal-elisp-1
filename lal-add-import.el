@@ -7,7 +7,7 @@
 
 (defun workspace-rebuild-index/make-empty ()
   (interactive)
-  (workspace-set (ede-current-project) 'import-symbol-cache (makehash 'equal)))
+  (clrhash (workspace-get (ede-current-project) 'import-symbol-cache)))
 
 (make-variable-buffer-local 'workspace-import-symbol-cache-cache)
 
@@ -20,7 +20,7 @@
 (defun workspace-dir-concat (a b)
   (if (starts-with b "/")
       b
-    (concat a "/" b)))xo
+    (concat a "/" b)))
 
 (defun workspace-rebuild-index ()
   (interactive)
@@ -262,12 +262,13 @@
                                     (noronha-jars-list jar-list)))
 
 (defun lal-expected-package-name-from-buffername ()
-  (let ((fn (buffer-file-name))
+  (let ((fn (file-truename (buffer-file-name)))
         (final nil)
         (srcroots (workspace-get-absolute-src-roots (current-workspace))))
 
     (mapc (lambda (sroot)
             (if (starts-with fn sroot)
                 (setq final (file-relative-name fn sroot)))) srcroots)
+    (message "Final filename is %s" final)
 
     (replace-regexp-in-string "\\.[a-zA-Z0-9]*\\.java" "" (replace-regexp-in-string "[/]" "." final))))
