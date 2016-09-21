@@ -7,7 +7,10 @@
 
 (defun workspace-rebuild-index/make-empty ()
   (interactive)
-  (clrhash (workspace-get (ede-current-project) 'import-symbol-cache)))
+  (let ((last-hash (workspace-get (ede-current-project) 'import-symbol-cache)))
+    (unless last-hash
+      (setq last-hash (workspace-set (ede-current-project) 'import-symbol-cache (make-hash-table :test 'equal))))
+    (clrhash last-hash)))
 
 (make-variable-buffer-local 'workspace-import-symbol-cache-cache)
 
@@ -43,7 +46,14 @@
 (defun workspace-get-packages-for-class (classname)
   (unless (workspace-import-symbol-cache)
     (workspace-rebuild-index))
-  (gethash classname (workspace-import-symbol-cache)))
+  (remove-if
+   (lambda (x)
+     (is-package-blacklisted
+      (ede-current-project) x))
+   (gethash classname (workspace-import-symbol-cache))))
+
+(defmethod is-package-blacklisted (w package)
+  (equal "junit.framework.Test" package))
 
 (defun workspace-add-mapping-for-fqdn-class (classname)
   (workspace-add-index-mapping
@@ -55,6 +65,7 @@
         (noronha-dir-list root)))
 
 (defun workspace-build-jar-index (jar)
+  (message "Going through %s" jar)
   (mapc 'workspace-add-mapping-for-fqdn-class
         (noronha-jar-list jar)))
 
@@ -130,13 +141,10 @@
   (lal-find-file-for-classname-regex (concat "^" classname "$")))
 
 (defun lal-find-file-for-classname-regex (classname-regex)
-  (noronha-flatten
-   (remove-if-not 'identity
-                  (append
-                   (let* ((src-roots (workspace-get-absolute-src-roots (current-workspace))))
-                     (mapcar
-                      (lambda (x) (mapcar (lambda (y) (concat x "/" y)) (lal-find-file-for-classname-in-dir classname-regex x)))
-                     src-roots))))))
+  (loop for x in (workspace-get-absolute-src-roots (current-workspace))
+        append (mapcar
+                (lambda (y) (concat x "/" y))
+                (lal-find-file-for-classname-in-dir classname-regex x))))
 
 (defun lal-canonicalize-classname (classname)
   (if classname
@@ -267,8 +275,13 @@
         (srcroots (workspace-get-absolute-src-roots (current-workspace))))
 
     (mapc (lambda (sroot)
+            (setf sroot (file-truename sroot))
+            (message "trying root %s with %s" sroot fn)
             (if (starts-with fn sroot)
-                (setq final (file-relative-name fn sroot)))) srcroots)
+                (setq final (file-relative-name fn sroot))))
+          srcroots)
     (message "Final filename is %s" final)
 
-    (replace-regexp-in-string "\\.[a-zA-Z0-9]*\\.java" "" (replace-regexp-in-string "[/]" "." final))))
+    (if (not final)
+        "could-not-find-package"
+      (replace-regexp-in-string "\\.[a-zA-Z0-9]*\\.java" "" (replace-regexp-in-string "[/]" "." final)))))
