@@ -7,6 +7,7 @@
 
 (defun workspace-rebuild-index/make-empty ()
   (interactive)
+  (workspace-set (ede-current-project) :src-files-listing nil)
   (let ((last-hash (workspace-get (ede-current-project) 'import-symbol-cache)))
     (unless last-hash
       (setq last-hash (workspace-set (ede-current-project) 'import-symbol-cache (make-hash-table :test 'equal))))
@@ -84,11 +85,14 @@
 ;; same as above, but instead of packages, actual file names
 (defun lal-filter-file-names-for-classname (classname-regex file-list)
   (remove-if-not
-   '(lambda (file-name)
+   (lambda (file-name)
       (string-match
        classname-regex
        (file-name-sans-extension (file-name-nondirectory file-name))))
    file-list))
+
+(defun lal-has-classname (file-name class-name)
+  (equal class-name (file-name-sans-extension (file-name-nondirectory file-name))))
 
 (ert-deftest lal-filter-file-names-for-classname ()
   (let ((files (list "a/b/C.java" "a/C.java" "a/B.java")))
@@ -138,13 +142,26 @@
     (should (equal '() (lal-find-file-for-classname-in-dir "^DoesNotExist$" fixtures)))))
 
 (defun lal-find-file-for-classname (classname)
-  (lal-find-file-for-classname-regex (concat "^" classname "$")))
+  (remove-if-not (lambda (x) (lal-has-classname x classname)) (lal-list-all-src-files)))
+
+(defun lal-list-all-src-files (&optional default-workspace)
+  (let* ((w (or default-workspace (current-workspace)))
+         (cached-result (workspace-get w :src-files-listing)))
+    (or
+     cached-result
+     (workspace-set w :src-files-listing
+      (loop for x in (workspace-get-absolute-src-roots w)
+           append (mapcar
+                   (lambda (y) (concat x "/" y))
+                   (noronha-dir-list-files x)))))))
 
 (defun lal-find-file-for-classname-regex (classname-regex)
-  (loop for x in (workspace-get-absolute-src-roots (current-workspace))
-        append (mapcar
-                (lambda (y) (concat x "/" y))
-                (lal-find-file-for-classname-in-dir classname-regex x))))
+  (lal-filter-file-names-for-classname classname-regex (lal-list-all-src-files)))
+
+(defun lal-list-classes (workspace)
+  (mapcar (lambda (x)
+            (file-name-sans-extension (file-name-nondirectory x)))
+          (lal-list-all-src-files workspace)))
 
 (defun lal-canonicalize-classname (classname)
   (if classname
@@ -178,17 +195,20 @@
     (let ((current-classname (lal-canonicalize-classname (thing-at-point 'word)))
           (all-classes
            (or
-          (looking-at )l-read-classname-cache
+            ;; (lal-read-classname-cache)
           (lal-classnames-for-classname-regex ".*"))))
-    (ede-make-project-local-variable lal-read-classname-cache)
-    (ede-set-project-local-variable lal-read-classname-cache all-classes)
-    (ido-completing-read
-     "Classname: " ;; prompt
-     all-classes   ;; choices
-     nil           ;; predicate
-     nil           ;; require match
-     current-classname ;; initial-input
-     lal-read-classname-history))))
+      (ede-make-project-local-variable lal-read-classname-cache)
+      (ede-set-project-local-variable lal-read-classname-cache all-classes)
+      (ido-completing-read
+       "Classname: " ;; prompt
+       all-classes   ;; choices
+       nil           ;; predicate
+       nil           ;; require match
+       current-classname ;; initial-input
+       lal-read-classname-history))))
+
+;; (defun lal-list-all-basenames ((w workspace))
+;;  lal-read-classname-cache
 
 
 (setq lal-find-file-history ())
