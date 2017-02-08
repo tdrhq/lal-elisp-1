@@ -88,11 +88,11 @@
    (lambda (file-name)
       (string-match
        classname-regex
-       (file-name-sans-extension (file-name-nondirectory file-name))))
+       (lal-file-name-sans-extension (file-name-nondirectory file-name))))
    file-list))
 
 (defun lal-has-classname (file-name class-name)
-  (equal class-name (file-name-sans-extension (file-name-nondirectory file-name))))
+  (equal class-name (lal-file-name-sans-extension (file-name-nondirectory file-name))))
 
 (ert-deftest lal-filter-file-names-for-classname ()
   (let ((files (list "a/b/C.java" "a/C.java" "a/B.java")))
@@ -159,9 +159,17 @@
   (lal-filter-file-names-for-classname classname-regex (lal-list-all-src-files)))
 
 (defun lal-list-classes (workspace)
-  (mapcar (lambda (x)
-            (file-name-sans-extension (file-name-nondirectory x)))
-          (lal-list-all-src-files workspace)))
+  (let ((ret (loop for x in (lal-list-all-src-files workspace)
+                   collect (lal-file-name-sans-extension (file-name-nondirectory x)))))
+    (remove-duplicates-from-sorted (setf ret (sort ret 'string-lessp)))))
+
+(defun remove-duplicates-from-sorted (l)
+  (if (not (and l (cdr l)))
+      (if (equal (car l) (car (cdr l)))
+          (cdr l)
+        (cons (car l) (remove-duplicates-from-sorted (cdr l))))
+    l))
+
 
 (defun lal-canonicalize-classname (classname)
   (if classname
@@ -180,32 +188,28 @@
   (should (equal "ArnoldNor" (lal-canonicalize-classname "arnoldNor"))))
 
 
+(defun lal-file-name-sans-extension (filename)
+  ;; file-name-sans-extension is slow, this is a faster version that works for limited cases
+  (let ((len (length filename)))
+    (if (and (> len 5) (eq (aref filename (- len 5)) ?.))
+        (substring filename 0 (- len 5))
+      (file-name-sans-extension filename))))
+
 (defun lal-classnames-for-classname-regex (regex)
   (let ((files (lal-find-file-for-classname-regex regex)))
     (mapcar
-     '(lambda (filename) (file-name-sans-extension (file-name-nondirectory filename)))
+     '(lambda (filename) (lal-file-name-sans-extension (file-name-nondirectory filename)))
      files)))
 
 (setq  lal-read-classname-history ())
 (defun lal-read-classname ()
   "Read a classname interactively and return it"
-  (if t
-      (read-string "Classname: (%s)" (lal-canonicalize-classname (thing-at-point 'word)))
-    (ede-apply-project-local-variables)
-    (let ((current-classname (lal-canonicalize-classname (thing-at-point 'word)))
-          (all-classes
-           (or
-            ;; (lal-read-classname-cache)
-          (lal-classnames-for-classname-regex ".*"))))
-      (ede-make-project-local-variable lal-read-classname-cache)
-      (ede-set-project-local-variable lal-read-classname-cache all-classes)
-      (ido-completing-read
-       "Classname: " ;; prompt
-       all-classes   ;; choices
-       nil           ;; predicate
-       nil           ;; require match
-       current-classname ;; initial-input
-       lal-read-classname-history))))
+  (ido-completing-read
+   "Classname: (%s)" ;; prompt
+   (lal-list-classes (current-workspace)) ;; choices
+   nil ;; predicate
+   t   ;; require-match
+   (lal-canonicalize-classname (thing-at-point 'word)))) ;; initial-input
 
 ;; (defun lal-list-all-basenames ((w workspace))
 ;;  lal-read-classname-cache
