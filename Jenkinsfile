@@ -2,7 +2,7 @@ node {
      git url: 'git@github.com:tdrhq/lal-elisp-1.git'
 
      try {
-          sh "emacs --script test.el"
+          sh "/home/arnold/builds/emacs/src/emacs --script test.el"
      } catch (any) {
           currentBuild.result = 'FAILURE'
      } finally {

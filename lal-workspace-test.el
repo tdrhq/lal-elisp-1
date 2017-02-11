@@ -35,9 +35,9 @@
                        :directory "/tmp/u")))
     (should (equal "/tmp/u/" (workspace-root ws)))))
 
-(ert-deftest lal-can-access-root ()
-  (let  ((ws (workspace nil :directory "/tmp/u")))
-    (should (equal "/tmp/u/" (ede-project-root ws)))))
+;;(ert-deftest lal-can-access-root ()
+;;  (let  ((ws (workspace nil :directory "/tmp/u")))
+;;    (should (equal "/tmp/u/" (ede-project-root ws)))))
 
 (ert-deftest lal-can-locate-project ()
   (let ((temp-project-dir (file-name-as-directory (expand-file-name "./fixtures"))))
