@@ -68,8 +68,36 @@
 (defmethod workspace-add-srcroot ((ws workspace) src)
   (oset ws :srcroot (cons src (oref ws :srcroot))))
 
-(defmethod workspace-add-jar ((ws workspace) src)
+(defun workspace-add-jar-impl (ws src)
   (oset ws :localclasspath (cons src (oref ws :localclasspath))))
+
+(defun workspace-expand-wildcards (ws wildcard)
+  (let ((default-directory (workspace-root ws)))
+    (file-expand-wildcards wildcard)))
+
+(defmethod workspace-add-jar ((ws workspace) src &optional wildcard)
+  (workspace-add-jar-impl
+   ws
+   (if wildcard
+       (let ((expansion (remove-if
+                         (lambda (x) (string-suffix-p "sources.jar" x))
+                         (workspace-expand-wildcards ws src))))
+         (if (cdr expansion)
+             (error "Too many matches for wildcard: %s" expansion)
+           (car expansion)))
+     (let ((default-directory (workspace-root ws)))
+       (if (file-exists-p src)
+           src
+         (error "File %s does not exist" src))))))
+
+(defun workspace-cleanup-jars (ws)
+  (let ((jars (oref ws :localclasspath)))
+    (oset ws :localclasspath
+          (loop for jar in jars
+                if (let ((default-directory (workspace-root ws)))
+                     (file-exists-p jar))
+                collect jar))))
+
 
 (defmethod workspace-remove-jar ((ws workspace) src)
   (delete src (oref ws :localclasspath)))
