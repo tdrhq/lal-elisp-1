@@ -8,11 +8,17 @@
 (defclass gradle-workspace (workspace)
   ())
 
+(defun gradle-get-android-sdk ()
+  (getenv "ANDROID_SDK"))
 
-(defun make-gradle-project (name gradle-dir)
+(cl-defun make-gradle-project (name gradle-dir &key (target-sdk "android-24"))
   (let ((ret (gradle-workspace name :directory gradle-dir
                             :file (concat gradle-dir "/build.gradle"))))
     (gradle-update-workspace ret gradle-dir)
+    (oset ret :localclasspath
+          (cons
+           (concat (gradle-get-android-sdk) "/platforms/" target-sdk "/android.jar")
+           (oref ret :localclasspath)))
     (oset ret :targets '())
     ret))
 
@@ -54,7 +60,7 @@
     ;; not a pom or sources
     (loop for jar in (directory-files-recursively dir ".*.jar")
           if (not (string-suffix-p "-sources.jar" jar))
-          return (concat dir "/" jar))))
+          return  jar)))
 
 (defun gradle-build-classpath (gradle-dir)
   (remove-if-not

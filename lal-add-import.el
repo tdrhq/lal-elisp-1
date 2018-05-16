@@ -22,7 +22,7 @@
     workspace-import-symbol-cache-cache))
 
 (defun workspace-dir-concat (a b)
-  (if (starts-with b "/")
+  (if (string-prefix-p "/" b)
       b
     (concat a "/" b)))
 
@@ -34,9 +34,11 @@
     (mapc 'workspace-build-src-index (workspace-get-absolute-src-roots (ede-current-project)))
     (message "Going to build jar index")
     (let ((project-root (ede-project-root-directory (ede-current-project))))
-      (mapc 'workspace-build-jar-index
-            (mapcar '(lambda (x) (workspace-dir-concat project-root x))
-                  (ede-java-classpath (ede-current-project)))))))
+      (loop for x in (ede-java-classpath (ede-current-project))
+            do
+            (message "Looking at '%s'" x)
+            (workspace-build-jar-index (workspace-dir-concat project-root x))))))
+
 
 (defun workspace-add-index-mapping (classname package)
   (puthash classname (cons
