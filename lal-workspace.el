@@ -200,3 +200,17 @@
     (should (find "One.java" (noronha-dir-list-files (list fixtures "/tmp")) :test 'equal))
     (should (equal nil (noronha-dir-list-files "/doesnotexist")))
     ))
+
+(defun arnold-set-last-index (name newindent)
+  (let ((a (assoc name c-offsets-alist)))
+    (if (and (cdr a) (listp (cdr a)))
+        (setcar (last (cdr a)) newindent)
+      (setcdr a newindent))))
+
+(defun  arnold-java-mode-hooks ()
+  (interactive)
+  (local-set-key (kbd "C-c h") 'search-android-docs)
+  (arnold-set-last-index 'statement-cont '++)
+  (arnold-set-last-index 'arglist-intro '++))
+
+(add-hook 'java-mode-hook 'arnold-java-mode-hooks)
