@@ -72,7 +72,7 @@
 
 
 (defmethod workspace-get-test ((ws gradle-workspace) filename)
-  (if (string-match ".*/androidTest/%s/.*Test.java" filename)
+  (if (string-match ".*/androidTest/.*Test.java" filename)
       (replace-regexp-in-string
        "Test.java" ".java"
        (replace-regexp-in-string "/androidTest/" "/main/" filename))
