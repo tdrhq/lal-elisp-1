@@ -88,7 +88,7 @@
 (defun lal-filter-file-names-for-classname (classname-regex file-list)
   (remove-if-not
    (lambda (file-name)
-      (string-match
+     (string-match
        classname-regex
        (lal-file-name-sans-extension (file-name-nondirectory file-name))))
    file-list))
