@@ -214,3 +214,15 @@
   (arnold-set-last-index 'arglist-intro '++))
 
 (add-hook 'java-mode-hook 'arnold-java-mode-hooks)
+
+(defmethod project-compile-project ((ws workspace) &optional _command)
+  (let ((command (or _command (compilation-read-command (concat "cd " (oref ws :directory) " && ")))))
+    (compile command)))
+
+(defun arnold-compile ()
+  (interactive)
+  (if (ede-current-project)
+      (ede-compile-project)
+    (compile)))
+
+(global-set-key "\C-cc" 'arnold-compile)
