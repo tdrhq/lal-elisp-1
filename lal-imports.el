@@ -99,8 +99,9 @@
   "Given a domain, tell me which numbered section it should be in"
   (number-to-string
    (+ 100
-      (position t
-                (mapcar (lambda (domain) (starts-with import domain)) (lal-interesting-domains) )))))
+      (or (position t
+                    (mapcar (lambda (domain) (starts-with import domain)) (lal-interesting-domains) ))
+          0))))
 
 (defun add-a-numeric-prefix-for-domain (d)
   (let ((prefix
