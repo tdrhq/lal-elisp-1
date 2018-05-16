@@ -77,7 +77,6 @@
          (loop for dependencies in (get-subproject-dependencies (concat gradle-dir "/" subproject))
                collect (gradle-get-cache-location dependencies)))))
 
-
 (defmethod workspace-get-test ((ws gradle-workspace) filename)
   (if (string-match ".*/androidTest/.*Test.java" filename)
       (replace-regexp-in-string

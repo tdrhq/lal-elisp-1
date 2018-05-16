@@ -38,6 +38,7 @@
    (cache-map :initarg :cache-map
               :accessor cache-map
               :initform (make-hash-table))
+   (last-compile-command  :accessor workspace-last-compile-command)
    ))
 
 (defmethod workspace-set ((ws workspace) key value)
@@ -216,8 +217,14 @@
 (add-hook 'java-mode-hook 'arnold-java-mode-hooks)
 
 (defmethod project-compile-project ((ws workspace) &optional _command)
-  (let ((command (or _command (compilation-read-command (concat "cd " (oref ws :directory) " && ")))))
-    (compile command)))
+  (let ((last-compile-command (workspace-last-compile-command ws)))
+    (when (and last-compile-command (equal last-compile-command ""))
+      (setf last-compile-command nil))
+    (let ((command (or _command
+                       (compilation-read-command (or last-compile-command
+                                                     (concat "cd " (oref ws :directory) " && "))))))
+      (setf (workspace-last-compile-command ws) command)
+      (compile command))))
 
 (defun arnold-compile ()
   (interactive)
