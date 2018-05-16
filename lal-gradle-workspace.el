@@ -6,25 +6,32 @@
 
 
 (defclass gradle-workspace (workspace)
-  ())
+  ((target-sdk :initarg :target-sdk)))
 
 (defun gradle-get-android-sdk ()
-  (getenv "ANDROID_SDK"))
+  (or
+   (getenv "ANDROID_SDK")
+   (getenv "ANDROID_HOME")))
 
 (cl-defun make-gradle-project (name gradle-dir &key (target-sdk "android-24"))
   (let ((ret (gradle-workspace name :directory gradle-dir
-                            :file (concat gradle-dir "/build.gradle"))))
-    (gradle-update-workspace ret gradle-dir)
-    (oset ret :localclasspath
-          (cons
-           (concat (gradle-get-android-sdk) "/platforms/" target-sdk "/android.jar")
-           (oref ret :localclasspath)))
+                               :file (concat gradle-dir "/build.gradle")
+                               :target-sdk target-sdk)))
     (oset ret :targets '())
+    (gradle-update-workspace ret)
     ret))
 
-(defun gradle-update-workspace (workspace gradle-dir)
-  (oset workspace :srcroot (gradle-get-src-roots gradle-dir))
-  (oset workspace :localclasspath (gradle-build-classpath gradle-dir)))
+(defun gradle-update-workspace (&optional workspace)
+  (interactive)
+  (let ((workspace (or workspace (ede-current-project))))
+    (unless workspace
+      (error "No workspace on current file"))
+    (let ((gradle-dir (oref workspace :directory))
+          (target-sdk (oref workspace :target-sdk)))
+      (oset workspace :srcroot (gradle-get-src-roots gradle-dir))
+      (oset workspace :localclasspath (cons
+                                       (concat (gradle-get-android-sdk) "/platforms/" target-sdk "/android.jar")
+                                       (gradle-build-classpath gradle-dir))))))
 
 (defun gradle-read-sub-projects (gradle-dir)
   (with-temp-buffer
