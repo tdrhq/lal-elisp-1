@@ -69,3 +69,21 @@
          append
          (loop for dependencies in (get-subproject-dependencies (concat gradle-dir "/" subproject))
                collect (gradle-get-cache-location dependencies)))))
+
+
+(defmethod workspace-get-test ((ws gradle-workspace) filename)
+  (if (string-match ".*/androidTest/%s/.*Test.java" filename)
+      (replace-regexp-in-string
+       "Test.java" ".java"
+       (replace-regexp-in-string "/androidTest/" "/main/" filename))
+
+    ;; else
+    (replace-regexp-in-string
+     "\\.java" "Test.java"
+     (replace-regexp-in-string
+      "/main/" "/androidTest/" filename))))
+
+(defun goto-test ()
+  (interactive)
+  (let ((workspace (ede-current-project)))
+    (find-file (workspace-get-test workspace (buffer-file-name)))))
