@@ -10,12 +10,17 @@
       (progn ,@f)
       (forward-line))))
 
+(defun lal-get-package-term-char ()
+  (if (equal major-mode 'kotlin-mode)
+      "\n"
+    ";"))
+
 (defun lal-get-package ()
   (save-excursion
     (beginning-of-buffer)
     (re-search-forward "package ")
     (buffer-substring (point) (progn
-                                (re-search-forward ";")
+                                (re-search-forward (lal-get-package-term-char))
                                 (backward-char)
                                 (point)))))
 
@@ -54,7 +59,7 @@
   (save-excursion
     (beginning-of-line)
     (when (equal (thing-at-point 'word) "import")
-      (when (re-search-forward "import \\(.*\\);" nil t)
+      (when (re-search-forward (concat "import \\(.*\\)" (if (equal major-mode 'kotlin-mode) "" ";")) nil t)
         (match-string 1)))))
 
 (defun imports-in-buffer ()
@@ -145,7 +150,8 @@
         (lal-remove-multiple-empty-lines))))
 
 
-
+(defun lal-import-suffix-string ()
+  (if (equal major-mode 'kotlin-mode) "\n" ";\n"))
 
 (defun lal-reorder-imports ()
   (interactive)
@@ -153,7 +159,7 @@
     (lal-goto-first-import)
     (let ((old-imports (delete-dups (remove-if-not 'import-used-p (imports-in-buffer)))))
       (delete-all-imports)
-      (mapc (lambda (val) (insert (concat "import " val ";\n")))
+      (mapc (lambda (val) (insert (concat "import " val (lal-import-suffix-string))))
             (sort old-imports 'lal-import-lessp))
 
       (add-newlines-between-sections)
@@ -224,5 +230,5 @@
   (unless (and import (equal "" import))
     (save-excursion
       (lal-goto-first-import)
-      (insert (concat "import " import ";\n")))
+      (insert (concat "import " import (lal-import-suffix-string))))
     (lal-reorder-imports)))
