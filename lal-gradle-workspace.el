@@ -77,15 +77,17 @@
          (loop for dependencies in (get-subproject-dependencies (concat gradle-dir "/" subproject))
                collect (gradle-get-cache-location dependencies)))))
 
+
+
 (defmethod workspace-get-test ((ws gradle-workspace) filename)
-  (if (string-match ".*/androidTest/.*Test.java" filename)
+  (if (string-match (concat ".*/androidTest/.*Test" (arnold-get-language-extension)) filename)
       (replace-regexp-in-string
-       "Test.java" ".java"
+       (concat "Test" (arnold-get-language-extension)) ".java"
        (replace-regexp-in-string "/androidTest/" "/main/" filename))
 
     ;; else
     (replace-regexp-in-string
-     "\\.java" "Test.java"
+     (concat "\\" (arnold-get-language-extension)) (concat "Test" (arnold-get-language-extension))
      (replace-regexp-in-string
       "/main/" "/androidTest/" filename))))
 

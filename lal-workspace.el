@@ -183,6 +183,11 @@
   (should (equal nil (noronha-flatten '())))
   (noronha-flatten (loop for i from 1 to 1000 collect i)))
 
+(defun noronha-list-files-should-not-list-p (file)
+  (or (string-match "/$" file)
+      (and
+       (not (string-match ".java$" file))
+       (not (string-match ".kt$" file)))))
 
 (defun noronha-dir-list-files (dir)
   (remove-if-not
@@ -190,7 +195,7 @@
    (let ((dirs (noronha-flatten (list dir))))
      (noronha-flatten (mapcar (lambda (dir)
                                 (mapcar (lambda (x) (substring x 2))
-                                        (remove-if '(lambda  (file) (or (string-match "/$" file) (not (string-match ".java$" file))))
+                                        (remove-if 'noronha-list-files-should-not-list-p
                                                    (split-string (shell-command-to-string (concat "cd " dir " && find ."))))))
                               dirs)))))
 
@@ -233,3 +238,8 @@
     (compile)))
 
 (global-set-key "\C-cc" 'arnold-compile)
+
+(defun arnold-get-language-extension ()
+  (if (equal major-mode 'kotlin-mode)
+      ".kt"
+    ".java"))

@@ -200,7 +200,7 @@
 (defun lal-classnames-for-classname-regex (regex)
   (let ((files (lal-find-file-for-classname-regex regex)))
     (mapcar
-     '(lambda (filename) (lal-file-name-sans-extension (file-name-nondirectory filename)))
+     (lambda (filename) (lal-file-name-sans-extension (file-name-nondirectory filename)))
      files)))
 
 (setq  lal-read-classname-history ())
@@ -262,7 +262,8 @@
 (defun noronha-get-canonical-package (package)
   (replace-regexp-in-string
    "/" "."
-   (replace-regexp-in-string "\\.class$\\|\\.java$\\|/$" "" package)))
+   (replace-regexp-in-string "\\.class$\\|\\.java$\\|\\.kt$\\|/$" "" package)))
+
 
 (defun mret (a)
   (message "got %s" a)
@@ -310,4 +311,4 @@
 
     (if (not final)
         "could-not-find-package"
-      (replace-regexp-in-string "\\.[a-zA-Z0-9]*\\.java" "" (replace-regexp-in-string "[/]" "." final)))))
+      (replace-regexp-in-string "\\.[a-zA-Z0-9]*\\(\\.java|\\.kt)" "" (replace-regexp-in-string "[/]" "." final)))))
