@@ -269,13 +269,25 @@
   (message "got %s" a)
   a)
 
+(defun noronha-list-classes-in-archive (file)
+  (let ((prefix (concat "cat " file)))
+    (when (string-suffix-p ".aar" file)
+      (setf prefix (concat "unzip -p " file " classes.jar")))
+    (split-string (shell-command-to-string (concat prefix " | jar -t ")))))
+
 (defun noronha-jar-list (file)
   (message "listing jar %s" file)
   (unless (file-exists-p file)
     (error "File %s does not exist" file))
   (mapcar 'noronha-get-canonical-package
           (remove-if '(lambda  (file) (string-match "/$" file))
-                     (mret (split-string (shell-command-to-string (concat "jar -tf " file)))))))
+                     (mret (noronha-list-classes-in-archive file)))))
+
+(defun noronha-aar-list (file)
+  (with-temp-buffer
+    output-buffer
+    (with-temp-file file
+      (shell-command  (concat "unzip -p classes.jar " file " > "
 
 (defun noronha-dir-list (dir)
   "Get a list of all top level classes in the given source directory"

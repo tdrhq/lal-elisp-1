@@ -51,9 +51,11 @@
   (with-temp-buffer
     (insert-file-contents (concat subproject-dir "/build.gradle"))
     (goto-char 0)
-    (loop while (re-search-forward "implementation '\\(.*:.*:.*\\)'" nil t)
-          collect
-          (match-string 1))))
+    (loop for prefix in '("implementation" "androidTestCompile")
+          append
+          (loop while (re-search-forward (concat prefix " '\\(.*:.*:.*\\)'") nil t)
+                collect
+                (match-string 1)))))
 
 (defun gradle-get-cache-location (maven-package)
   (let* ((parts (split-string maven-package ":"))
@@ -65,7 +67,9 @@
     ;; good news is, doesn't look like there are aar files in
     ;; here. So find all possible assets, and pull the one that's
     ;; not a pom or sources
-    (loop for jar in (directory-files-recursively dir ".*.jar")
+    (loop for jar in (append
+                      (directory-files-recursively dir ".*.jar")
+                      (directory-files-recursively dir ".*.aar"))
           if (not (string-suffix-p "-sources.jar" jar))
           return  jar)))
 
