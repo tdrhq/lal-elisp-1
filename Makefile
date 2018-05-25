@@ -12,5 +12,8 @@ lal-workspace-test:
 lal-add-import-test:
 	$(TESTCOMMAND) lal-add-import-test.el
 
-test: verify-emacs lal-add-import-test lal-workspace-test
+lal-test-setup-test:
+	$(TESTCOMMAND) lal-test-setup-test.el
+
+test: verify-emacs lal-add-import-test lal-workspace-test lal-test-setup-test
 	true

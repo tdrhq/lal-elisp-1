@@ -1,8 +1,10 @@
+(load-file "test-common.el")
 
 (require 'lal-test-setup)
+(require 'lal-strings)
 
 (ert-deftest test-setup-basics ()
-  (lal-delete-temp-project 
+  (lal-delete-temp-project
    (lal-create-temp-project)))
 
 (ert-deftest lal-with-temp-project-test ()
@@ -18,3 +20,5 @@
    (should (file-exists-p (concat temp-project-dir "/b/c/D.java")))
    (lal-touch temp-project-dir "F.java")
    (should (file-exists-p (concat temp-project-dir "/F.java")))))
+
+(ert-run-tests-batch-and-exit)
