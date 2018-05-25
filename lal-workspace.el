@@ -235,7 +235,7 @@
   (interactive)
   (if (ede-current-project)
       (ede-compile-project)
-    (compile)))
+    (call-interactively 'compile)))
 
 (global-set-key "\C-cc" 'arnold-compile)
 
