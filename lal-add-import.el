@@ -283,12 +283,6 @@
           (remove-if '(lambda  (file) (string-match "/$" file))
                      (mret (noronha-list-classes-in-archive file)))))
 
-(defun noronha-aar-list (file)
-  (with-temp-buffer
-    output-buffer
-    (with-temp-file file
-      (shell-command  (concat "unzip -p classes.jar " file " > "
-
 (defun noronha-dir-list (dir)
   "Get a list of all top level classes in the given source directory"
   (message "listing dir %s" dir)
