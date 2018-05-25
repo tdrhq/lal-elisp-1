@@ -2,6 +2,7 @@
 
 (provide 'lal-workspace)
 
+(require 'lal-strings)
 (require 'eieio)
 (require 'lal-workspace-list)
 (require 'ede/config)
@@ -117,7 +118,7 @@
 (defmethod workspace-get-buffers ((ws workspace))
   "Get all open buffers that we think belongs to the workspace"
   (remove-if-not
-   '(lambda (a) (starts-with (buffer-file-name a) (workspace-root ws)))
+   '(lambda (a) (string-prefix-p (workspace-root ws) (buffer-file-name a)))
    (buffer-list)))
 
 (defmethod ede-java-classpath ((ws workspace))

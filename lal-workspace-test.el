@@ -1,3 +1,4 @@
+(load-file "./test-common.el")
 
 (require 'lal-workspace)
 (require 'lal-test-setup)
@@ -51,3 +52,5 @@
 (ert-deftest lal-interesting-domains-test ()
   (let ((ws (workspace "foo" :interesting-domains '("java"))))
     (should (equal '("java") (interesting-domains ws)))))
+
+(ert-run-tests-batch-and-exit)
