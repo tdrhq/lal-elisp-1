@@ -1,6 +1,7 @@
 
 (provide 'lal-add-import)
-
+(require 'cl)
+(require 'eieio)
 (require 'lal-strings)
 (require 'lal-imports)
 (require 'memoize)
