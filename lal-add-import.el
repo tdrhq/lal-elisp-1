@@ -289,10 +289,10 @@
   (lal-filter-imports-for-classname classname
                                     (noronha-jars-list jar-list)))
 
-(defun lal-expected-package-name-from-buffername ()
-  (let ((fn (file-truename (buffer-file-name)))
+(defun lal-expected-package-name-from-buffername (&optional filename absolute-roots)
+  (let ((fn (file-truename (or filename (buffer-file-name))))
         (final nil)
-        (srcroots (workspace-get-absolute-src-roots (current-workspace))))
+        (srcroots (or absolute-roots (workspace-get-absolute-src-roots (current-workspace)))))
 
     (mapc (lambda (sroot)
             (setf sroot (file-truename sroot))
@@ -304,4 +304,4 @@
 
     (if (not final)
         "could-not-find-package"
-      (replace-regexp-in-string "\\.[a-zA-Z0-9]*\\(\\.java|\\.kt)" "" (replace-regexp-in-string "[/]" "." final)))))
+      (replace-regexp-in-string "\\.[a-zA-Z0-9]*\\(\\.java\\|\\.kt\\)$" "" (replace-regexp-in-string "[/]" "." final)))))

@@ -41,4 +41,7 @@
     (should (equal '("a/b/C.java" "a/C.java") (lal-filter-file-names-for-classname "C" files)))))
 
 
+(ert-deftest lal-expected-package-name-from-buffername ()
+  (should (equal "com.foo.bar" (lal-expected-package-name-from-buffername "/androidTest/com/foo/bar/Blah.java" '("/androidTest")))))
+
 (ert-run-tests-batch-and-exit)
