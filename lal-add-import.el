@@ -97,12 +97,6 @@
 (defun lal-has-classname (file-name class-name)
   (equal class-name (lal-file-name-sans-extension (file-name-nondirectory file-name))))
 
-(ert-deftest lal-filter-file-names-for-classname ()
-  (let ((files (list "a/b/C.java" "a/C.java" "a/B.java")))
-    (should (equal '() (lal-filter-file-names-for-classname "Fooey" files)))
-    (should (equal '("a/B.java") (lal-filter-file-names-for-classname "B" files)))
-    (should (equal '("a/b/C.java" "a/C.java") (lal-filter-file-names-for-classname "C" files)))))
-
 (defun lal-trim-tag (tag)
   (replace-regexp-in-string "^@" "" tag))
 (setq giit-history '())
@@ -139,10 +133,8 @@
   (let ((dir-listing (noronha-dir-list-files dir)))
     (lal-filter-file-names-for-classname classname-regex dir-listing)))
 
-(ert-deftest lal-find-file-for-classname-in-dir ()
-  (let ((fixtures (concat (lal-project-dir) "/fixtures")))
-    (should (equal (list "One.java") (lal-find-file-for-classname-in-dir "^One$" fixtures)))
-    (should (equal '() (lal-find-file-for-classname-in-dir "^DoesNotExist$" fixtures)))))
+(defun lal-project-dir ()
+  (oref (ede-current-project) :directory))
 
 (defun lal-find-file-for-classname (classname)
   (remove-if-not (lambda (x) (lal-has-classname x classname)) (lal-list-all-src-files)))
@@ -183,12 +175,6 @@
               ;; capitalize the first letter
               (let ((cn (string-to-list classname)))
                 (concat (cons (capitalize (first cn)) (rest cn)) )))))))
-
-(ert-deftest lal-canonicalize-classname ()
-  (should (equal nil (lal-canonicalize-classname nil)))
-  (should (equal "ArnoldNor" (lal-canonicalize-classname "ArnoldNor")))
-  (should (equal "ArnoldNor" (lal-canonicalize-classname "mArnoldNor")))
-  (should (equal "ArnoldNor" (lal-canonicalize-classname "arnoldNor"))))
 
 
 (defun lal-file-name-sans-extension (filename)
