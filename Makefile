@@ -1,6 +1,6 @@
 
 
-EMACS := emacs
+EMACS ?= emacs
 TESTCOMMAND=$(EMACS) --no-desktop -q  --no-init-file --kill --batch -l
 
 verify-emacs:
