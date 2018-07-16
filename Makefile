@@ -19,4 +19,4 @@ test: verify-emacs lal-add-import-test lal-workspace-test lal-test-setup-test
 	true
 
 jenkins:
-	EMACS=~arnold/.local/bin/emacs $(MAKE) test
+	EMACS=~arnold/builds/emacs/src/emacs $(MAKE) test
