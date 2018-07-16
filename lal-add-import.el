@@ -289,17 +289,16 @@
   (lal-filter-imports-for-classname classname
                                     (noronha-jars-list jar-list)))
 
-(defun lal-expected-package-name-from-buffername (&optional filename absolute-roots)
+(defun find-src-root-for-filename (filename &optional absolute-roots)
   (let ((fn (file-truename (or filename (buffer-file-name))))
-        (final nil)
         (srcroots (or absolute-roots (workspace-get-absolute-src-roots (current-workspace)))))
+    (loop for sroot in srcroots
+          if (starts-with fn sroot)
+          return (file-relative-name fn sroot))))
 
-    (mapc (lambda (sroot)
-            (setf sroot (file-truename sroot))
-            (message "trying root %s with %s" sroot fn)
-            (if (starts-with fn sroot)
-                (setq final (file-relative-name fn sroot))))
-          srcroots)
+(defun lal-expected-package-name-from-buffername (&optional filename absolute-roots)
+  (let ((final (find-src-root-for-filename (or filename (buffer-file-name)) absolute-roots)))
+
     (message "Final filename is %s" final)
 
     (if (not final)
