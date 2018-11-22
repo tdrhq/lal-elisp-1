@@ -13,6 +13,9 @@
    (getenv "ANDROID_SDK")
    (getenv "ANDROID_HOME")))
 
+(defun gradle-get-android-jar ()
+  (concat (gradle-get-android-sdk) "/platforms/" target-sdk "/android.jar"))
+
 (cl-defun make-gradle-project (name gradle-dir &key (target-sdk "android-24"))
   (let ((ret (gradle-workspace name :directory gradle-dir
                                :file (concat gradle-dir "/build.gradle")
@@ -30,7 +33,7 @@
           (target-sdk (oref workspace :target-sdk)))
       (oset workspace :srcroot (gradle-get-src-roots gradle-dir))
       (oset workspace :localclasspath (cons
-                                       (concat (gradle-get-android-sdk) "/platforms/" target-sdk "/android.jar")
+                                       (gradle-get-android-jar)
                                        (gradle-build-classpath gradle-dir))))))
 
 (defun gradle-read-sub-projects (gradle-dir)
