@@ -17,10 +17,15 @@
     ret))
 
 (defun buck-update-workspace (&optional workspace)
+  (interactive)
   (let ((workspace (or workspace (ede-current-project))))
     (oset workspace :srcroot '("java/" "javatests/" "android_tests/"))
     (oset workspace :localclasspath
-          (list
-           (gradle-get-android-jar)))))
+          (cons
+           (gradle-get-android-jar)
+           (buck-read-third-party-jars (oref workspace :directory))))))
 
-(oref (car ede-projects) :srcroot)
+(defun buck-read-third-party-jars (dir)
+  (directory-files-recursively (concat dir "/third-party") ".*.jar"))
+
+;; (message "%s" (oref *jippo-project* :localclasspath))
