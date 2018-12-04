@@ -13,7 +13,7 @@
    (getenv "ANDROID_SDK")
    (getenv "ANDROID_HOME")))
 
-(defun gradle-get-android-jar ()
+(cl-defun gradle-get-android-jar (&optional (target-sdk "android-24"))
   (concat (gradle-get-android-sdk) "/platforms/" target-sdk "/android.jar"))
 
 (cl-defun make-gradle-project (name gradle-dir &key (target-sdk "android-24"))
