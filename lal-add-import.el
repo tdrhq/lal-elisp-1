@@ -247,8 +247,8 @@
 ;; jar file parsers
 
 (defun noronha-get-canonical-package (package)
-  (replace-regexp-in-string
-   "/" "."
+  (subst-char-in-string
+   ?/ ?.
    (replace-regexp-in-string "\\.class$\\|\\.java$\\|\\.kt$\\|/$" "" package)))
 
 
@@ -269,7 +269,7 @@
   (unless (file-exists-p file)
     (error "File %s does not exist" file))
   (loop for file in (noronha-list-classes-in-archive file)
-        unless (string-match "/$" file)
+        unless (string-suffix-p "/" file)
         collect (noronha-get-canonical-package file)))
 
 (defun noronha-dir-list (dir)
