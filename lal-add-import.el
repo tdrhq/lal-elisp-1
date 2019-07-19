@@ -257,7 +257,7 @@
   (message "got %s" a)
   a)
 
-(defvar *archive-cache* nil)
+(defvar *noronha-archive-cache* nil)
 
 (defun noronha-list-classes-in-archive (file)
   (flet ((get-uncached ()
@@ -265,7 +265,7 @@
                          (when (string-suffix-p ".aar" file)
                            (setf prefix (concat "unzip -p " file " classes.jar")))
                          (split-string (shell-command-to-string (concat prefix " | jar -t "))))))
-    (let ((cached-element (assoc file *archive-cache* 'equal))
+    (let ((cached-element (assoc file *noronha-archive-cache* 'equal))
           (mod-time (file-attribute-modification-time (file-attributes file))))
       (cond
        ((equal mod-time (cadr cached-element))
@@ -274,7 +274,7 @@
         (setf (caddr cached-element) (get-uncached)))
        (t
         (let ((ret (get-uncached)))
-          (push (list file mod-time ret) *archive-cache*)
+          (push (list file mod-time ret) *noronha-archive-cache*)
           ret))))))
 
 (defvar *noronha-jar-list-cache* nil)
@@ -294,7 +294,8 @@
 
 
 (defun noronha-jars-list (file-list)
-  (apply 'nconc (mapcar 'noronha-jar-list file-list)))
+  (loop for x in file-list
+        concatenate (noronha-jar-list x)))
 
 
 ;; A list of interesting jar files.
