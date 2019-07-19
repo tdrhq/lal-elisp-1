@@ -39,8 +39,7 @@
    (cache-map :initarg :cache-map
               :accessor cache-map
               :initform (make-hash-table))
-   (last-compile-command  :accessor workspace-last-compile-command)
-   ))
+   (last-compile-command  :accessor workspace-last-compile-command)))
 
 (defmethod workspace-set ((ws workspace) key value)
   (let ((map (oref ws :cache-map)))

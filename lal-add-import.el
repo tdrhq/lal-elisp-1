@@ -262,13 +262,15 @@
       (setf prefix (concat "unzip -p " file " classes.jar")))
     (split-string (shell-command-to-string (concat prefix " | jar -t ")))))
 
+(defvar *noronha-jar-list-cache* nil)
+
 (defun noronha-jar-list (file)
   (message "listing jar %s" file)
   (unless (file-exists-p file)
     (error "File %s does not exist" file))
-  (mapcar 'noronha-get-canonical-package
-          (remove-if '(lambda  (file) (string-match "/$" file))
-                     (mret (noronha-list-classes-in-archive file)))))
+  (loop for file in (noronha-list-classes-in-archive file)
+        unless (string-match "/$" file)
+        collect (noronha-get-canonical-package file)))
 
 (defun noronha-dir-list (dir)
   "Get a list of all top level classes in the given source directory"
