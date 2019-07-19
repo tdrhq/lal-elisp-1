@@ -249,18 +249,33 @@
 (defun noronha-get-canonical-package (package)
   (subst-char-in-string
    ?/ ?.
-   (replace-regexp-in-string "\\.class$\\|\\.java$\\|\\.kt$\\|/$" "" package)))
-
+   (dolist (suffix '(".class" ".java" ".kt") package)
+     (when (string-suffix-p suffix package)
+       (setf package (substring package 0 (- (length suffix))))))))
 
 (defun mret (a)
   (message "got %s" a)
   a)
 
+(defvar *archive-cache* nil)
+
 (defun noronha-list-classes-in-archive (file)
-  (let ((prefix (concat "cat " file)))
-    (when (string-suffix-p ".aar" file)
-      (setf prefix (concat "unzip -p " file " classes.jar")))
-    (split-string (shell-command-to-string (concat prefix " | jar -t ")))))
+  (flet ((get-uncached ()
+                       (let ((prefix (concat "cat " file)))
+                         (when (string-suffix-p ".aar" file)
+                           (setf prefix (concat "unzip -p " file " classes.jar")))
+                         (split-string (shell-command-to-string (concat prefix " | jar -t "))))))
+    (let ((cached-element (assoc file *archive-cache* 'equal))
+          (mod-time (file-attribute-modification-time (file-attributes file))))
+      (cond
+       ((equal mod-time (cadr cached-element))
+        (caddr cached-element))
+       (cached-element
+        (setf (caddr cached-element) (get-uncached)))
+       (t
+        (let ((ret (get-uncached)))
+          (push (list file mod-time ret) *archive-cache*)
+          ret))))))
 
 (defvar *noronha-jar-list-cache* nil)
 
