@@ -28,4 +28,18 @@
 (defun buck-read-third-party-jars (dir)
   (directory-files-recursively (concat dir "/third-party") ".*.jar"))
 
+(defmethod workspace-get-test ((ws buck-workspace) filename)
+  (if (string-match (concat ".*/javatests/.*Test" (arnold-get-language-extension)) filename)
+      (replace-regexp-in-string
+       (concat "Test" (arnold-get-language-extension)) ".java"
+       (replace-regexp-in-string "/javatests/" "/java/" filename))
+
+    ;; else
+    (replace-regexp-in-string
+     (concat "\\" (arnold-get-language-extension)) (concat "Test" (arnold-get-language-extension))
+     (replace-regexp-in-string
+      "/java/" "/javatests/" filename))))
+
+(defmethod workspace-get-test )
+
 ;; (message "%s" (oref *jippo-project* :localclasspath))
